@@ -3,9 +3,14 @@
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%); /* 保持绝对居中 */
-    width: 760px;
-    height: 85vh; /* 面板总高度固定 */
+    transform: translate(-50%, -50%);
+    
+    /* 响应式尺寸：适配手机到电脑 */
+    width: 95vw;          
+    max-width: 760px;     
+    height: 85dvh;        /* 适配 Safari 地址栏 */
+    max-height: 900px;
+    
     background: #1a1a1a;
     border: 2px solid #b38b59;
     z-index: 20000;
@@ -16,16 +21,15 @@
     font-family: 'Noto Serif SC', 'Cormorant Garamond', serif;
 }
 
-/* 顶部标题栏 (原拖拽条，现改为静态标题栏) */
+/* 顶部标题栏 */
 #cte-drag-handle {
     width: 100%;
-    height: 35px; /* 固定高度 */
+    height: 40px;
     background: #242424;
-    cursor: default; /* 改为默认鼠标，不再显示移动图标 */
+    cursor: default;
     display: flex;
-    justify-content: center; /* 文字居中 */
+    justify-content: center;
     align-items: center;
-    /* padding: 0 15px; */ /* 不需要padding了，因为只有一个居中的元素 */
     border-bottom: 1px solid #b38b59;
     color: #e0c5a1;
     font-weight: bold;
@@ -34,35 +38,21 @@
     z-index: 20003; 
 }
 
-/* 删除了 #cte-close-btn 的样式 */
-
 /* 内容区域 */
 #cte-content-area {
-    height: calc(100% - 35px);
+    height: calc(100% - 40px);
     width: 100%;
     position: static; 
     overflow-y: auto; 
     overflow-x: hidden;
     padding: 0;
     background-color: #1a1a1a;
+    -webkit-overflow-scrolling: touch;
 }
 
-/* 强制显示滚动条样式 */
-#cte-content-area::-webkit-scrollbar { 
-    width: 10px; 
-    display: block;
-}
-#cte-content-area::-webkit-scrollbar-track { 
-    background: #1a1a1a; 
-}
-#cte-content-area::-webkit-scrollbar-thumb { 
-    background: #444; 
-    border-radius: 4px; 
-    border: 1px solid #1a1a1a;
-}
-#cte-content-area::-webkit-scrollbar-thumb:hover {
-    background: #b38b59; 
-}
+#cte-content-area::-webkit-scrollbar { width: 6px; display: block; }
+#cte-content-area::-webkit-scrollbar-track { background: #1a1a1a; }
+#cte-content-area::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
 
 /* --- 弹窗样式 --- */
 .cte-popup {
@@ -72,23 +62,24 @@
     left: 50%;
     transform: translate(-50%, -50%);
     
-    width: clamp(300px, 80vw, 600px);
-    max-height: 80vh;
+    width: 85%;
+    max-width: 500px;
+    max-height: 70vh;
+    
     overflow-y: auto; 
     background-color: #242424;
     border: 1px solid #b38b59;
     border-left: 5px solid #b38b59;
-    padding: 30px;
+    padding: 20px;
     z-index: 20002;
     box-shadow: 0 0 50px rgba(0,0,0,1); 
     text-align: left;
 }
 
-/* 弹窗内部滚动条 */
-.cte-popup::-webkit-scrollbar { width: 6px; }
-.cte-popup::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+.cte-popup::-webkit-scrollbar { width: 4px; }
+.cte-popup::-webkit-scrollbar-thumb { background: #555; border-radius: 2px; }
 
-/* --- 基础通用样式 --- */
+/* --- 基础样式 --- */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Noto+Serif+SC:wght@400;700&display=swap');
 
 .cte-wrapper {
@@ -96,7 +87,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
+    padding: 10px;
     width: 100%;
 }
 
@@ -113,34 +104,39 @@
     border-bottom: 1px solid #444;
     padding-bottom: 15px;
     width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
+/* 控制栏 */
 .controls-bar {
     background: #242424;
     border: 1px solid #b38b59;
-    padding: 10px 20px;
+    padding: 10px;
     margin-bottom: 15px;
     border-radius: 4px;
     display: flex;
-    gap: 15px;
+    flex-wrap: wrap;
+    gap: 8px;
     align-items: center;
+    justify-content: center;
     color: #e0c5a1;
     font-size: 14px;
-    width: 700px;
+    width: 100%;
+    max-width: 700px;
 }
 
 .cte-btn {
     border: 1px solid #b38b59;
     color: #e0c5a1;
     background-color: transparent;
-    padding: 5px 15px;
+    padding: 6px 12px;
     border-radius: 2px;
     cursor: pointer;
     font-family: 'Noto Serif SC', serif;
     transition: all 0.3s;
     text-align: center;
     display: inline-block;
+    font-size: 13px;
 }
 .cte-btn:hover { background-color: #b38b59; color: #1a1a1a; }
 
@@ -150,8 +146,11 @@
 /* 地图容器 */
 .map-container {
     position: relative;
-    width: 700px;
-    height: 700px;
+    width: 100%;
+    max-width: 700px;
+    aspect-ratio: 1 / 1; /* 保持正方形 */
+    height: auto; 
+    
     background-color: #242424;
     background-image: url('https://files.catbox.moe/clwj2e.jpg');
     background-size: cover;
@@ -162,65 +161,93 @@
     overflow: hidden;
     flex-shrink: 0; 
     margin-bottom: 50px; 
+    touch-action: none;
 }
 
+/* 坐标点 */
 .location {
     position: absolute;
-    cursor: move;
+    cursor: grab;
     transition: transform 0.2s ease;
     user-select: none;
     z-index: 10;
     background-color: rgba(0, 0, 0, 0.85);
     border: 1px solid #b38b59;
-    padding: 4px 10px;
-    border-radius: 2px;
+    padding: 4px 8px;
+    border-radius: 4px;
     display: flex;
     justify-content: center;
     align-items: center;
     white-space: nowrap;
     transform: translate(-50%, -50%);
+    touch-action: none;
 }
+.location:active { cursor: grabbing; }
 .location:hover { z-index: 20; background-color: #b38b59; color: #1a1a1a !important; }
 .location.dragging { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); background-color: #e0c5a1; color: #000 !important; }
-.location .label { font-size: 13px; font-weight: bold; pointer-events: none; }
+.location .label { font-size: 12px; font-weight: bold; pointer-events: none; }
 
-.cte-popup h3 { color: #e0c5a1; border-bottom: 1px solid #555; padding-bottom: 10px; margin-top: 0; }
-.cte-popup p { font-size: 16px; line-height: 1.8; color: #dcdcdc; }
+.cte-popup h3 { color: #e0c5a1; border-bottom: 1px solid #555; padding-bottom: 10px; margin-top: 0; font-size: 18px; }
+.cte-popup p { font-size: 14px; line-height: 1.6; color: #dcdcdc; }
 
-.popup-image { width: 100%; height: 250px; object-fit: cover; margin: 15px 0; border: 1px solid #444; display: block; }
-
-/* 遮罩层 */
-.popup-overlay { 
-    display: none; 
-    position: absolute; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%; 
-    background: rgba(0,0,0,0.7); 
-    z-index: 20001; 
-}
-
-.close-btn { position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 24px; color: #888; }
-.close-btn:hover { color: #e0c5a1; }
+.popup-image { width: 100%; height: auto; max-height: 200px; object-fit: cover; margin: 15px 0; border: 1px solid #444; display: block; }
+.popup-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 20001; }
 
 .interior-container { position: relative; width: 100%; margin-top: 15px; border: 1px solid #444; }
 .interior-image { width: 100%; height: auto; display: block; }
-.floor-nav { position: absolute; top: 50%; left: 10px; transform: translateY(-50%); display: flex; flex-direction: column; gap: 8px; z-index: 10; }
-.floor-btn { background-color: rgba(0,0,0,0.85); border: 1px solid #b38b59; color: #e0c5a1; padding: 8px 12px; cursor: pointer; text-align: left; }
-.floor-btn:hover { background-color: #b38b59; color: #1a1a1a; }
+.floor-nav { position: absolute; top: 50%; left: 5px; transform: translateY(-50%); display: flex; flex-direction: column; gap: 4px; z-index: 10; }
+.floor-btn { background-color: rgba(0,0,0,0.85); border: 1px solid #b38b59; color: #e0c5a1; padding: 4px 8px; cursor: pointer; text-align: left; font-size: 11px; }
 
-.sub-menu-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 20; flex-direction: column; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box; text-align: center; }
-.sub-menu-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 90%; }
-.sub-item-btn { background: transparent; border: 1px solid #666; color: #dcdcdc; padding: 5px 10px; cursor: pointer; }
-.sub-item-btn:hover { border-color: #e0c5a1; color: #e0c5a1; }
+.sub-menu-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 20; flex-direction: column; justify-content: center; align-items: center; padding: 10px; box-sizing: border-box; text-align: center; }
+.sub-menu-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; width: 100%; max-height: 80%; overflow-y: auto; }
+.sub-item-btn { background: transparent; border: 1px solid #666; color: #dcdcdc; padding: 6px; cursor: pointer; font-size: 12px; }
 
 #travel-menu-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 20005; justify-content: center; align-items: center; }
-.travel-menu-box { position: relative; background: #242424; border: 1px solid #b38b59; padding: 30px; width: 300px; text-align: center; }
-.travel-input { width: 80%; padding: 8px; margin-bottom: 15px; background: #1a1a1a; border: 1px solid #b38b59; color: #dcdcdc; text-align: center; }
+.travel-menu-box { position: relative; background: #242424; border: 1px solid #b38b59; padding: 20px; width: 85%; max-width: 300px; text-align: center; }
+.travel-input { width: 90%; padding: 8px; margin-bottom: 15px; background: #1a1a1a; border: 1px solid #b38b59; color: #dcdcdc; text-align: center; }
 
 /* Colors */
 #dorm { color: #81c784; } #office { color: #64b5f6; } #villa { color: #ba68c8; } #office2 { color: #e57373; }
 #office3 { color: #90caf9; } #office4 { color: #b39ddb; } #highschool { color: #ffcc80; } #gov { color: #ef9a9a; }
 #PrivateClub { color: #ce93d8; } #TVstation { color: #80cbc4; } #airport { color: #b0bec5; } #port { color: #a5d6a7; }
 #other-places { color: #ffe0b2; }
+
+/* --- iPhone / 小屏幕手机专用优化 --- */
+@media screen and (max-width: 600px) {
+    /* 缩小地图上的标签，防止在小屏幕上过于拥挤 */
+    .location {
+        padding: 2px 6px;
+        border-width: 1px;
+    }
+    .location .label {
+        font-size: 10px; /* 字体更小 */
+    }
+
+    /* 调整控制栏布局紧凑 */
+    .controls-bar {
+        padding: 5px;
+        gap: 5px;
+    }
+    .cte-btn {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    /* 调整弹窗内边距，让内容显示更多 */
+    .cte-popup {
+        padding: 15px;
+        width: 90%; /* 弹窗更宽 */
+    }
+    .cte-popup h3 {
+        font-size: 16px;
+    }
+    .cte-popup p {
+        font-size: 13px;
+    }
+
+    /* 楼层导航按钮更紧凑 */
+    .floor-btn {
+        padding: 3px 6px;
+        font-size: 10px;
+    }
+}

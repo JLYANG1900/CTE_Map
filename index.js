@@ -3,6 +3,7 @@ const extensionPath = `scripts/extensions/third-party/${extensionName}`;
 
 let stContext = null;
 
+// 定义全局命名空间
 window.CTEMap = {
     currentDestination: '',
     roomDetails: {
@@ -91,10 +92,8 @@ async function initializeExtension() {
     }
 
     $('#cte-toggle-btn').on('click', () => $('#cte-map-panel').fadeToggle());
-    // 移除 close-btn 绑定，因为 HTML 里已经删除了
 }
 
-// 核心逻辑：添加了 Touch 事件支持
 function bindMapEvents() {
     const mapContainer = document.getElementById('cte-map-container');
     if (!mapContainer) return;
@@ -106,15 +105,12 @@ function bindMapEvents() {
         let startX, startY, initialLeft, initialTop;
         let hasMoved = false;
 
-        // 通用开始拖拽函数
         const startDrag = (e) => {
-            // 获取坐标（兼容鼠标和触摸）
             const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
             const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
 
-            // 如果是触摸，阻止默认滚动
             if (e.type === 'touchstart') {
-                // 不阻止默认可能导致拖拽时整个页面滚动，这里建议不阻止冒泡，但要在 move 时阻止默认
+                // 不阻止默认可能导致拖拽时整个页面滚动
             } else {
                 e.preventDefault();
                 e.stopPropagation();
@@ -130,10 +126,9 @@ function bindMapEvents() {
             initialTop = elm.offsetTop;
         };
 
-        // 通用移动函数
         const doDrag = (e) => {
             if (!isDragging) return;
-            e.preventDefault(); // 关键：阻止触摸时的屏幕滚动
+            e.preventDefault(); // 阻止屏幕滚动
 
             const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
             const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
@@ -141,7 +136,6 @@ function bindMapEvents() {
             const dx = clientX - startX;
             const dy = clientY - startY;
             
-            // 增加一点容错，防止点击被误判为拖拽
             if (Math.abs(dx) > 5 || Math.abs(dy) > 5) hasMoved = true;
 
             let newLeft = initialLeft + dx;
@@ -154,7 +148,6 @@ function bindMapEvents() {
             elm.style.top = newTop + 'px';
         };
 
-        // 通用结束拖拽函数
         const stopDrag = () => {
             if (!isDragging) return;
             isDragging = false;
@@ -168,7 +161,6 @@ function bindMapEvents() {
             }
         };
 
-        // 鼠标事件绑定
         elm.addEventListener('mousedown', (e) => {
             startDrag(e);
             document.addEventListener('mousemove', doDrag);
@@ -178,10 +170,8 @@ function bindMapEvents() {
             }, { once: true });
         });
 
-        // 触摸事件绑定 (iPad 核心修复)
         elm.addEventListener('touchstart', (e) => {
             startDrag(e);
-            // 触摸事件通常绑定在元素自身或 window 上
             const touchMoveHandler = (ev) => doDrag(ev);
             const touchEndHandler = () => {
                 stopDrag();

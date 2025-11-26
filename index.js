@@ -3,7 +3,6 @@ const extensionPath = `scripts/extensions/third-party/${extensionName}`;
 
 let stContext = null;
 
-// 定义全局命名空间
 window.CTEMap = {
     currentDestination: '',
     roomDetails: {
@@ -53,7 +52,6 @@ const initInterval = setInterval(() => {
 async function initializeExtension() {
     console.log("[CTE Map] Initializing...");
 
-    // 清理旧元素
     $('#cte-map-panel').remove();
     $('#cte-toggle-btn').remove();
     $('link[href*="CTE_Map/style.css"]').remove();
@@ -63,7 +61,6 @@ async function initializeExtension() {
     link.href = `${extensionPath}/style.css`;
     document.head.appendChild(link);
 
-    // 修改：移除了关闭按钮，只保留标题
     const panelHTML = `
         <div id="cte-toggle-btn" title="打开 CTE 地图" 
              style="position:fixed; top:130px; left:10px; z-index:9000; width:40px; height:40px; background:#b38b59; border-radius:50%; display:flex; justify-content:center; align-items:center; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.3); color:#fff; font-size:20px;">
@@ -93,12 +90,11 @@ async function initializeExtension() {
         $('#cte-content-area').html(`<p style="padding:20px; color:white;">无法加载地图文件 (map.html)。<br>请检查控制台获取详细错误。</p>`);
     }
 
-    // 绑定开关逻辑：只通过 toggle button 控制
     $('#cte-toggle-btn').on('click', () => $('#cte-map-panel').fadeToggle());
-    
-    // 修改：移除了 draggable 初始化和 close-btn 的点击事件
+    // 移除 close-btn 绑定，因为 HTML 里已经删除了
 }
 
+// 核心逻辑：添加了 Touch 事件支持
 function bindMapEvents() {
     const mapContainer = document.getElementById('cte-map-container');
     if (!mapContainer) return;
@@ -110,48 +106,92 @@ function bindMapEvents() {
         let startX, startY, initialLeft, initialTop;
         let hasMoved = false;
 
-        elm.onmousedown = function(e) {
-            e.preventDefault();
-            e.stopPropagation(); // 阻止事件冒泡
+        // 通用开始拖拽函数
+        const startDrag = (e) => {
+            // 获取坐标（兼容鼠标和触摸）
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+
+            // 如果是触摸，阻止默认滚动
+            if (e.type === 'touchstart') {
+                // 不阻止默认可能导致拖拽时整个页面滚动，这里建议不阻止冒泡，但要在 move 时阻止默认
+            } else {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
             isDragging = true;
             hasMoved = false;
             elm.classList.add('dragging');
             
-            startX = e.clientX;
-            startY = e.clientY;
+            startX = clientX;
+            startY = clientY;
             initialLeft = elm.offsetLeft;
             initialTop = elm.offsetTop;
-
-            document.onmousemove = function(e) {
-                if (!isDragging) return;
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-                if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMoved = true;
-
-                let newLeft = initialLeft + dx;
-                let newTop = initialTop + dy;
-                
-                newLeft = Math.max(0, Math.min(newLeft, mapContainer.offsetWidth));
-                newTop = Math.max(0, Math.min(newTop, mapContainer.offsetHeight));
-
-                elm.style.left = newLeft + 'px';
-                elm.style.top = newTop + 'px';
-            };
-
-            document.onmouseup = function() {
-                isDragging = false;
-                elm.classList.remove('dragging');
-                document.onmousemove = null;
-                document.onmouseup = null;
-
-                if (!hasMoved) {
-                    const popupId = elm.getAttribute('data-popup');
-                    if (popupId) window.CTEMap.showPopup(popupId);
-                } else {
-                    savePosition(elm.id, elm.style.left, elm.style.top);
-                }
-            };
         };
+
+        // 通用移动函数
+        const doDrag = (e) => {
+            if (!isDragging) return;
+            e.preventDefault(); // 关键：阻止触摸时的屏幕滚动
+
+            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+
+            const dx = clientX - startX;
+            const dy = clientY - startY;
+            
+            // 增加一点容错，防止点击被误判为拖拽
+            if (Math.abs(dx) > 5 || Math.abs(dy) > 5) hasMoved = true;
+
+            let newLeft = initialLeft + dx;
+            let newTop = initialTop + dy;
+            
+            newLeft = Math.max(0, Math.min(newLeft, mapContainer.offsetWidth));
+            newTop = Math.max(0, Math.min(newTop, mapContainer.offsetHeight));
+
+            elm.style.left = newLeft + 'px';
+            elm.style.top = newTop + 'px';
+        };
+
+        // 通用结束拖拽函数
+        const stopDrag = () => {
+            if (!isDragging) return;
+            isDragging = false;
+            elm.classList.remove('dragging');
+
+            if (!hasMoved) {
+                const popupId = elm.getAttribute('data-popup');
+                if (popupId) window.CTEMap.showPopup(popupId);
+            } else {
+                savePosition(elm.id, elm.style.left, elm.style.top);
+            }
+        };
+
+        // 鼠标事件绑定
+        elm.addEventListener('mousedown', (e) => {
+            startDrag(e);
+            document.addEventListener('mousemove', doDrag);
+            document.addEventListener('mouseup', () => {
+                stopDrag();
+                document.removeEventListener('mousemove', doDrag);
+            }, { once: true });
+        });
+
+        // 触摸事件绑定 (iPad 核心修复)
+        elm.addEventListener('touchstart', (e) => {
+            startDrag(e);
+            // 触摸事件通常绑定在元素自身或 window 上
+            const touchMoveHandler = (ev) => doDrag(ev);
+            const touchEndHandler = () => {
+                stopDrag();
+                document.removeEventListener('touchmove', touchMoveHandler);
+                document.removeEventListener('touchend', touchEndHandler);
+            };
+            
+            document.addEventListener('touchmove', touchMoveHandler, { passive: false });
+            document.addEventListener('touchend', touchEndHandler);
+        }, { passive: false });
     });
 }
 

@@ -3,6 +3,7 @@ const extensionPath = `scripts/extensions/third-party/${extensionName}`;
 
 let stContext = null;
 
+// 定义全局命名空间
 window.CTEMap = {
     currentDestination: '',
     roomDetails: {
@@ -52,7 +53,6 @@ const initInterval = setInterval(() => {
 async function initializeExtension() {
     console.log("[CTE Map] Initializing...");
 
-    // [核心修复] 彻底清除旧元素，防止样式残留
     $('#cte-map-panel').remove();
     $('#cte-toggle-btn').remove();
     $('link[href*="CTE_Map/style.css"]').remove();
@@ -91,13 +91,7 @@ async function initializeExtension() {
         $('#cte-content-area').html(`<p style="padding:20px; color:white;">无法加载地图文件 (map.html)。<br>请检查控制台获取详细错误。</p>`);
     }
 
-    // [核心修复] 强制清除 panel 上可能残留的 inline styles (top/left/transform)
-    // 防止 jQuery UI draggable 遗留的样式干扰 CSS 的 inset 居中
-    $('#cte-toggle-btn').on('click', () => {
-        const panel = $('#cte-map-panel');
-        panel.removeAttr('style'); // 清除所有内联样式
-        panel.css('display', 'flex'); // 重新应用 display，但让 CSS 控制位置
-    });
+    $('#cte-toggle-btn').on('click', () => $('#cte-map-panel').fadeToggle());
 }
 
 function bindMapEvents() {
@@ -115,7 +109,9 @@ function bindMapEvents() {
             const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
             const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
 
-            if (e.type !== 'touchstart') {
+            if (e.type === 'touchstart') {
+                // 不阻止默认可能导致拖拽时整个页面滚动
+            } else {
                 e.preventDefault();
                 e.stopPropagation();
             }
@@ -132,7 +128,7 @@ function bindMapEvents() {
 
         const doDrag = (e) => {
             if (!isDragging) return;
-            if (e.type.includes('touch')) e.preventDefault(); 
+            e.preventDefault(); // 阻止屏幕滚动
 
             const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
             const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;

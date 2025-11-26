@@ -53,7 +53,7 @@ const initInterval = setInterval(() => {
 async function initializeExtension() {
     console.log("[CTE Map] Initializing...");
 
-    // 清理可能存在的旧元素，防止重复加载导致的ID冲突
+    // 清理旧元素
     $('#cte-map-panel').remove();
     $('#cte-toggle-btn').remove();
     $('link[href*="CTE_Map/style.css"]').remove();
@@ -63,6 +63,7 @@ async function initializeExtension() {
     link.href = `${extensionPath}/style.css`;
     document.head.appendChild(link);
 
+    // 修改：移除了关闭按钮，只保留标题
     const panelHTML = `
         <div id="cte-toggle-btn" title="打开 CTE 地图" 
              style="position:fixed; top:130px; left:10px; z-index:9000; width:40px; height:40px; background:#b38b59; border-radius:50%; display:flex; justify-content:center; align-items:center; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,0.3); color:#fff; font-size:20px;">
@@ -71,9 +72,7 @@ async function initializeExtension() {
         <div id="cte-map-panel">
             <div id="cte-drag-handle">
                 <span>CTE 档案地图</span>
-                <span id="cte-close-btn">❌</span>
             </div>
-            <!-- 注意这里的 id，对应 css 中的 content-area -->
             <div id="cte-content-area">Loading Map...</div>
         </div>
     `;
@@ -94,16 +93,10 @@ async function initializeExtension() {
         $('#cte-content-area').html(`<p style="padding:20px; color:white;">无法加载地图文件 (map.html)。<br>请检查控制台获取详细错误。</p>`);
     }
 
-    // 使用 fadeToggle 更方便
+    // 绑定开关逻辑：只通过 toggle button 控制
     $('#cte-toggle-btn').on('click', () => $('#cte-map-panel').fadeToggle());
-    $('#cte-close-btn').on('click', () => $('#cte-map-panel').fadeOut());
-
-    if ($.fn.draggable) {
-        $('#cte-map-panel').draggable({ 
-            handle: '#cte-drag-handle',
-            containment: 'window'
-        });
-    }
+    
+    // 修改：移除了 draggable 初始化和 close-btn 的点击事件
 }
 
 function bindMapEvents() {
@@ -202,20 +195,17 @@ window.CTEMap.changeBackground = function(input) {
 window.CTEMap.showPopup = function(id) {
     if (id === 'dorm-detail-popup') window.CTEMap.closeAllPopups();
     
-    // 使用 querySelector 限制在 panel 内部查找，避免找到错误的元素
     const popup = document.querySelector(`#cte-map-panel #${id}`);
     const overlay = document.querySelector(`#cte-map-panel #cte-overlay`);
     
     if (popup) {
         if (overlay) overlay.style.display = 'block';
         popup.style.display = 'block';
-        // 修正：打开弹窗时，让弹窗内部回滚到顶部
         popup.scrollTop = 0;
     }
 };
 
 window.CTEMap.closeAllPopups = function() {
-    // 隐藏遮罩和所有弹窗
     $('#cte-map-panel #cte-overlay').hide();
     $('#cte-map-panel .cte-popup').hide();
     window.CTEMap.closeSubMenu();

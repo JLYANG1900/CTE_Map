@@ -478,10 +478,10 @@ window.CTEMap.openThirdLevelMenu = function(roomName, floorTitle, floorItems) {
                         }
                     </div>
                     <div class="avatar-upload-section">
-                        <div class="file-input-wrapper cte-btn avatar-upload-btn">
-                            <span>📷 ${hasAvatar ? '更换头像' : '上传头像'}</span>
-                            <input type="file" id="user-avatar-upload" accept="image/*" onchange="window.CTEMap.uploadUserAvatar(this)">
-                        </div>
+                        <button class="cte-btn avatar-upload-btn" onclick="document.getElementById('user-avatar-upload').click()">
+                            📷 ${hasAvatar ? '更换头像' : '上传头像'}
+                        </button>
+                        <input type="file" id="user-avatar-upload" accept="image/*" style="display:none;" onchange="window.CTEMap.uploadUserAvatar(this)">
                         ${hasAvatar ? `<button class="cte-btn avatar-delete-btn" onclick="window.CTEMap.deleteUserAvatar()">🗑️ 删除头像</button>` : ''}
                     </div>
                     <div class="character-info">

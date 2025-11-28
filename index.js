@@ -67,6 +67,12 @@ window.CTEMap = {
             age: 27,
             role: '传奇Solo爱豆、CTE精神支柱、艺名Lovan',
             personality: '慵懒随性、桀骜不驯、腹黑'
+        },
+        '你': {
+            image: '', // 用户自定义头像，默认为空
+            age: '?',
+            role: 'CTE宿舍成员',
+            personality: '由你定义'
         }
     },
     roomDetails: {
@@ -113,6 +119,72 @@ const initInterval = setInterval(() => {
     }
 }, 500);
 
+/**
+ * [修复] 动态计算并设置面板位置
+ * 解决手机端因浏览器地址栏/工具栏导致的界面上浮问题
+ */
+function fixPanelPosition() {
+    const panel = document.getElementById('cte-map-panel');
+    if (!panel) return;
+
+    // 获取真实可视区域尺寸
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+    
+    // 获取面板尺寸
+    const panelRect = panel.getBoundingClientRect();
+    const panelHeight = panelRect.height || panel.offsetHeight;
+    const panelWidth = panelRect.width || panel.offsetWidth;
+
+    // 判断是否为移动端（宽度小于 768px）
+    const isMobile = viewportWidth < 768;
+
+    if (isMobile) {
+        // 移动端：使用 fixed 定位，基于真实 viewport 计算
+        // 清除 CSS 中的 transform 居中，改用直接定位
+        panel.style.position = 'fixed';
+        panel.style.transform = 'none';
+        panel.style.top = Math.max(10, (viewportHeight - panelHeight) / 2) + 'px';
+        panel.style.left = Math.max(5, (viewportWidth - panelWidth) / 2) + 'px';
+        
+        // 确保面板不会超出屏幕顶部
+        if (parseFloat(panel.style.top) < 10) {
+            panel.style.top = '10px';
+        }
+        
+        // 移动端限制最大高度，防止超出可视区域
+        panel.style.maxHeight = (viewportHeight - 20) + 'px';
+    } else {
+        // 桌面端：恢复原版 CSS 居中效果
+        panel.style.position = 'fixed';
+        panel.style.top = '50%';
+        panel.style.left = '50%';
+        panel.style.transform = 'translate(-50%, -50%)';
+        panel.style.maxHeight = '85vh';
+    }
+}
+
+/**
+ * [新增] 监听窗口变化，实时调整面板位置
+ */
+function setupResizeListener() {
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            const panel = document.getElementById('cte-map-panel');
+            if (panel && panel.style.display !== 'none') {
+                fixPanelPosition();
+            }
+        }, 100);
+    });
+
+    // 针对移动端浏览器地址栏显示/隐藏的特殊处理
+    window.addEventListener('orientationchange', () => {
+        setTimeout(fixPanelPosition, 300);
+    });
+}
+
 async function initializeExtension() {
     console.log("[CTE Map] Initializing...");
 
@@ -157,8 +229,19 @@ async function initializeExtension() {
         $('#cte-content-area').html(`<p style="padding:20px; color:white;">无法加载地图文件 (map.html)。<br>请检查控制台获取详细错误。</p>`);
     }
 
-    // 使用 fadeToggle 更方便
-    $('#cte-toggle-btn').on('click', () => $('#cte-map-panel').fadeToggle());
+    // [修复] 打开面板时调用 fixPanelPosition
+    $('#cte-toggle-btn').on('click', () => {
+        const panel = $('#cte-map-panel');
+        if (panel.is(':visible')) {
+            panel.fadeOut();
+        } else {
+            panel.fadeIn(200, function() {
+                // 面板显示后立即修正位置
+                fixPanelPosition();
+            });
+        }
+    });
+    
     $('#cte-close-btn').on('click', () => $('#cte-map-panel').fadeOut());
 
     if ($.fn.draggable) {
@@ -167,6 +250,9 @@ async function initializeExtension() {
             containment: 'window'
         });
     }
+
+    // [新增] 设置窗口变化监听
+    setupResizeListener();
 }
 
 function bindMapEvents() {
@@ -373,39 +459,93 @@ window.CTEMap.openThirdLevelMenu = function(roomName, floorTitle, floorItems) {
     let contentHTML = '';
     
     if (profile) {
-        // 角色房间：显示角色图片和详细资料
-        contentHTML = `
-            <div class="character-room-detail">
-                <div class="character-portrait">
-                    <img src="${profile.image}" alt="${roomName}" class="character-image">
-                </div>
-                <div class="character-info">
-                    <div class="info-row">
-                        <span class="info-label">姓名</span>
-                        <span class="info-value">${roomName}</span>
+        // 特殊处理"你"的房间
+        if (roomName === '你') {
+            // 尝试从localStorage读取用户自定义头像
+            const savedAvatar = localStorage.getItem('cte_user_avatar');
+            const avatarSrc = savedAvatar || '';
+            const hasAvatar = avatarSrc !== '';
+            
+            contentHTML = `
+                <div class="character-room-detail">
+                    <div class="character-portrait user-portrait ${hasAvatar ? '' : 'no-avatar'}">
+                        ${hasAvatar 
+                            ? `<img src="${avatarSrc}" alt="你" class="character-image" id="user-avatar-img">` 
+                            : `<div class="avatar-placeholder" id="user-avatar-placeholder">
+                                <span class="placeholder-icon">👤</span>
+                                <span class="placeholder-text">点击上传头像</span>
+                               </div>`
+                        }
                     </div>
-                    <div class="info-row">
-                        <span class="info-label">年龄</span>
-                        <span class="info-value">${profile.age}岁</span>
+                    <div class="avatar-upload-section">
+                        <div class="file-input-wrapper cte-btn avatar-upload-btn">
+                            <span>📷 ${hasAvatar ? '更换头像' : '上传头像'}</span>
+                            <input type="file" id="user-avatar-upload" accept="image/*" onchange="window.CTEMap.uploadUserAvatar(this)">
+                        </div>
+                        ${hasAvatar ? `<button class="cte-btn avatar-delete-btn" onclick="window.CTEMap.deleteUserAvatar()">🗑️ 删除头像</button>` : ''}
                     </div>
-                    <div class="info-row">
-                        <span class="info-label">身份</span>
-                        <span class="info-value">${profile.role}</span>
+                    <div class="character-info">
+                        <div class="info-row">
+                            <span class="info-label">姓名</span>
+                            <span class="info-value">你</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">年龄</span>
+                            <span class="info-value">${profile.age}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">身份</span>
+                            <span class="info-value">${profile.role}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">性格</span>
+                            <span class="info-value">${profile.personality}</span>
+                        </div>
                     </div>
-                    <div class="info-row">
-                        <span class="info-label">性格</span>
-                        <span class="info-value">${profile.personality}</span>
+                    <div class="room-description">
+                        <p>${desc}</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="cte-btn" onclick="window.CTEMap.openTravelMenu('你的房间')">🚀 前往</button>
+                        <button class="sub-item-btn" id="temp-back-btn">[ < 返回上一级 ]</button>
                     </div>
                 </div>
-                <div class="room-description">
-                    <p>${desc}</p>
+            `;
+        } else {
+            // 其他角色房间：显示角色图片和详细资料
+            contentHTML = `
+                <div class="character-room-detail">
+                    <div class="character-portrait">
+                        <img src="${profile.image}" alt="${roomName}" class="character-image">
+                    </div>
+                    <div class="character-info">
+                        <div class="info-row">
+                            <span class="info-label">姓名</span>
+                            <span class="info-value">${roomName}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">年龄</span>
+                            <span class="info-value">${profile.age}岁</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">身份</span>
+                            <span class="info-value">${profile.role}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">性格</span>
+                            <span class="info-value">${profile.personality}</span>
+                        </div>
+                    </div>
+                    <div class="room-description">
+                        <p>${desc}</p>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="cte-btn" onclick="window.CTEMap.openTravelMenu('${roomName}的房间')">🚀 前往</button>
+                        <button class="sub-item-btn" id="temp-back-btn">[ < 返回上一级 ]</button>
+                    </div>
                 </div>
-                <div class="action-buttons">
-                    <button class="cte-btn" onclick="window.CTEMap.openTravelMenu('${roomName}的房间')">🚀 前往</button>
-                    <button class="sub-item-btn" id="temp-back-btn">[ < 返回上一级 ]</button>
-                </div>
-            </div>
-        `;
+            `;
+        }
     } else {
         // 普通房间：保持原有样式
         contentHTML = `
@@ -420,6 +560,45 @@ window.CTEMap.openThirdLevelMenu = function(roomName, floorTitle, floorItems) {
     contentEl.innerHTML = contentHTML;
     
     document.getElementById('temp-back-btn').onclick = () => window.CTEMap.openSubMenu(floorTitle, floorItems);
+};
+
+// 用户头像上传功能
+window.CTEMap.uploadUserAvatar = function(input) {
+    if (input.files && input.files[0]) {
+        const file = input.files[0];
+        
+        // 检查文件大小（限制为2MB）
+        if (file.size > 2 * 1024 * 1024) {
+            alert('图片大小不能超过2MB，请选择较小的图片');
+            return;
+        }
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const imageData = e.target.result;
+            
+            // 保存到localStorage
+            try {
+                localStorage.setItem('cte_user_avatar', imageData);
+                
+                // 刷新当前界面
+                window.CTEMap.openThirdLevelMenu('你', '五楼：私人宿舍区', ['秦述', '司洛', '鹿言', '魏星泽', '周锦宁', '谌绪', '孟明赫', '亓谢', '魏月华', '桑洛凡', '你', '公共书房/阅览区']);
+            } catch (err) {
+                alert('保存失败，图片可能太大。请尝试使用较小的图片。');
+                console.error('[CTE Map] Avatar save error:', err);
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+};
+
+// 删除用户头像
+window.CTEMap.deleteUserAvatar = function() {
+    if (confirm('确定要删除头像吗？')) {
+        localStorage.removeItem('cte_user_avatar');
+        // 刷新当前界面
+        window.CTEMap.openThirdLevelMenu('你', '五楼：私人宿舍区', ['秦述', '司洛', '鹿言', '魏星泽', '周锦宁', '谌绪', '孟明赫', '亓谢', '魏月华', '桑洛凡', '你', '公共书房/阅览区']);
+    }
 };
 
 window.CTEMap.openRooftopMenu = function() {

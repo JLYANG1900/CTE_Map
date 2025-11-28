@@ -1,9 +1,8 @@
 {
     "display_name": "CTE 虚拟地图",
     "author": "JLYANG1900",
-    "version": "1.0.1",
-    "description": "京港市虚拟地图扩展，支持拖拽坐标、查看地点详情及通过 slash command 发送出行指令。更新修复移动端不适配问题。",
+    "version": "1.1.0",
+    "description": "京港市虚拟地图扩展，支持拖拽坐标、查看地点详情及通过 slash command 发送出行指令。",
     "js": "index.js",
     "css": "style.css"
-
 }

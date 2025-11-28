@@ -6,6 +6,69 @@ let stContext = null;
 // 定义全局命名空间
 window.CTEMap = {
     currentDestination: '',
+    // 角色资料数据
+    characterProfiles: {
+        '魏月华': {
+            image: 'https://files.catbox.moe/auqnct.jpeg',
+            age: 27,
+            role: '万城娱乐CEO、CTE男团缔造者',
+            personality: '严肃、冷酷、认真、严谨'
+        },
+        '秦述': {
+            image: 'https://files.catbox.moe/c2khbl.jpeg',
+            age: 24,
+            role: 'CTE男团队长、主舞担当、艺名Qshot',
+            personality: '沉默、清冷、内敛'
+        },
+        '司洛': {
+            image: 'https://files.catbox.moe/pohz52.jpeg',
+            age: 24,
+            role: 'CTE男团全能ACE、主舞担当、艺名SOLO',
+            personality: '慵懒、随性、玩世不恭'
+        },
+        '鹿言': {
+            image: 'https://files.catbox.moe/parliq.jpeg',
+            age: 23,
+            role: 'CTE男团主唱担当、艺名DEER',
+            personality: '温柔、谦逊、善良'
+        },
+        '魏星泽': {
+            image: 'https://files.catbox.moe/syo0ze.jpeg',
+            age: 20,
+            role: 'CTE男团舞蹈担当、气氛担当、艺名STARS',
+            personality: '开朗、感性、大大咧咧'
+        },
+        '周锦宁': {
+            image: 'https://files.catbox.moe/1loxsn.jpeg',
+            age: 20,
+            role: 'CTE男团Rapper、门面担当、艺名JinNa',
+            personality: '傲娇、矜贵、毒舌'
+        },
+        '谌绪': {
+            image: 'https://files.catbox.moe/9tnuva.png',
+            age: 18,
+            role: 'CTE男团主唱担当、忙内、艺名Chase',
+            personality: '腹黑、恶劣、隐藏病娇'
+        },
+        '孟明赫': {
+            image: 'https://files.catbox.moe/m446ro.jpeg',
+            age: 20,
+            role: 'CTE男团Rapper、艺名Hades',
+            personality: '阴郁、厌世、内向、大胆叛逆'
+        },
+        '亓谢': {
+            image: 'https://files.catbox.moe/ev2g1l.png',
+            age: 18,
+            role: 'CTE男团舞蹈担当、副Rapper、艺名KNIFE',
+            personality: '疯批、天才、毒舌、直白'
+        },
+        '桑洛凡': {
+            image: 'https://files.catbox.moe/syudzu.png',
+            age: 27,
+            role: '传奇Solo爱豆、CTE精神支柱、艺名Lovan',
+            personality: '慵懒随性、桀骜不驯、腹黑'
+        }
+    },
     roomDetails: {
         '前院与玄关': '设有小型日式枯山水庭院与智能安防通道，风格低调奢华。',
         '客厅/公共休息区': '挑高设计，拥有整面墙的落地窗，配有超大尺寸的模块化沙发、顶级家庭影院系统和复古黑胶唱片机，是成员们放松、看电影或聊天的地方。',
@@ -49,72 +112,6 @@ const initInterval = setInterval(() => {
         initializeExtension();
     }
 }, 500);
-
-/**
- * [修复] 动态计算并设置面板位置
- * 解决手机端因浏览器地址栏/工具栏导致的界面上浮问题
- */
-function fixPanelPosition() {
-    const panel = document.getElementById('cte-map-panel');
-    if (!panel) return;
-
-    // 获取真实可视区域尺寸
-    const viewportHeight = window.innerHeight;
-    const viewportWidth = window.innerWidth;
-    
-    // 获取面板尺寸
-    const panelRect = panel.getBoundingClientRect();
-    const panelHeight = panelRect.height || panel.offsetHeight;
-    const panelWidth = panelRect.width || panel.offsetWidth;
-
-    // 判断是否为移动端（宽度小于 768px）
-    const isMobile = viewportWidth < 768;
-
-    if (isMobile) {
-        // 移动端：使用 fixed 定位，基于真实 viewport 计算
-        // 清除 CSS 中的 transform 居中，改用直接定位
-        panel.style.position = 'fixed';
-        panel.style.transform = 'none';
-        panel.style.top = Math.max(10, (viewportHeight - panelHeight) / 2) + 'px';
-        panel.style.left = Math.max(5, (viewportWidth - panelWidth) / 2) + 'px';
-        
-        // 确保面板不会超出屏幕顶部
-        if (parseFloat(panel.style.top) < 10) {
-            panel.style.top = '10px';
-        }
-        
-        // 移动端限制最大高度，防止超出可视区域
-        panel.style.maxHeight = (viewportHeight - 20) + 'px';
-    } else {
-        // 桌面端：恢复原版 CSS 居中效果
-        panel.style.position = 'fixed';
-        panel.style.top = '50%';
-        panel.style.left = '50%';
-        panel.style.transform = 'translate(-50%, -50%)';
-        panel.style.maxHeight = '85vh';
-    }
-}
-
-/**
- * [新增] 监听窗口变化，实时调整面板位置
- */
-function setupResizeListener() {
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            const panel = document.getElementById('cte-map-panel');
-            if (panel && panel.style.display !== 'none') {
-                fixPanelPosition();
-            }
-        }, 100);
-    });
-
-    // 针对移动端浏览器地址栏显示/隐藏的特殊处理
-    window.addEventListener('orientationchange', () => {
-        setTimeout(fixPanelPosition, 300);
-    });
-}
 
 async function initializeExtension() {
     console.log("[CTE Map] Initializing...");
@@ -160,19 +157,8 @@ async function initializeExtension() {
         $('#cte-content-area').html(`<p style="padding:20px; color:white;">无法加载地图文件 (map.html)。<br>请检查控制台获取详细错误。</p>`);
     }
 
-    // [修复] 打开面板时调用 fixPanelPosition
-    $('#cte-toggle-btn').on('click', () => {
-        const panel = $('#cte-map-panel');
-        if (panel.is(':visible')) {
-            panel.fadeOut();
-        } else {
-            panel.fadeIn(200, function() {
-                // 面板显示后立即修正位置
-                fixPanelPosition();
-            });
-        }
-    });
-    
+    // 使用 fadeToggle 更方便
+    $('#cte-toggle-btn').on('click', () => $('#cte-map-panel').fadeToggle());
     $('#cte-close-btn').on('click', () => $('#cte-map-panel').fadeOut());
 
     if ($.fn.draggable) {
@@ -181,9 +167,6 @@ async function initializeExtension() {
             containment: 'window'
         });
     }
-
-    // [新增] 设置窗口变化监听
-    setupResizeListener();
 }
 
 function bindMapEvents() {
@@ -384,13 +367,57 @@ window.CTEMap.openThirdLevelMenu = function(roomName, floorTitle, floorItems) {
     titleEl.textContent = roomName;
     const desc = window.CTEMap.roomDetails[roomName] || "暂无详细介绍。";
     
-    contentEl.innerHTML = `
-        <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%;">
-            <p style="text-align:justify; font-size:14px; line-height:1.6;">${desc}</p>
-            <button class="cte-btn" onclick="window.CTEMap.openTravelMenu('${roomName}')">🚀 前往</button>
-            <button class="sub-item-btn" id="temp-back-btn">[ < 返回上一级 ]</button>
-        </div>
-    `;
+    // 检查是否为角色房间
+    const profile = window.CTEMap.characterProfiles[roomName];
+    
+    let contentHTML = '';
+    
+    if (profile) {
+        // 角色房间：显示角色图片和详细资料
+        contentHTML = `
+            <div class="character-room-detail">
+                <div class="character-portrait">
+                    <img src="${profile.image}" alt="${roomName}" class="character-image">
+                </div>
+                <div class="character-info">
+                    <div class="info-row">
+                        <span class="info-label">姓名</span>
+                        <span class="info-value">${roomName}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">年龄</span>
+                        <span class="info-value">${profile.age}岁</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">身份</span>
+                        <span class="info-value">${profile.role}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">性格</span>
+                        <span class="info-value">${profile.personality}</span>
+                    </div>
+                </div>
+                <div class="room-description">
+                    <p>${desc}</p>
+                </div>
+                <div class="action-buttons">
+                    <button class="cte-btn" onclick="window.CTEMap.openTravelMenu('${roomName}的房间')">🚀 前往</button>
+                    <button class="sub-item-btn" id="temp-back-btn">[ < 返回上一级 ]</button>
+                </div>
+            </div>
+        `;
+    } else {
+        // 普通房间：保持原有样式
+        contentHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%;">
+                <p style="text-align:justify; font-size:14px; line-height:1.6;">${desc}</p>
+                <button class="cte-btn" onclick="window.CTEMap.openTravelMenu('${roomName}')">🚀 前往</button>
+                <button class="sub-item-btn" id="temp-back-btn">[ < 返回上一级 ]</button>
+            </div>
+        `;
+    }
+    
+    contentEl.innerHTML = contentHTML;
     
     document.getElementById('temp-back-btn').onclick = () => window.CTEMap.openSubMenu(floorTitle, floorItems);
 };

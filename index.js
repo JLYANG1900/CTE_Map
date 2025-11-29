@@ -6,7 +6,15 @@ let stContext = null;
 // 定义全局命名空间
 window.CTEMap = {
     currentDestination: '',
-    currentCompanion: '', // [新增] 用于暂存同伴姓名
+    currentCompanion: '', 
+    // [新增] 暂存NPC设置状态
+    tempNPCState: { enabled: false, content: '' },
+    // [新增] 地点对应的默认NPC配置
+    npcDefaults: {
+        '机场': '粉丝、工作人员、其他团队成员',
+        '京港电视台': '粉丝、工作人员、其他团队成员',
+        '私人会所': '社交名流'
+    },
     // 角色资料数据
     characterProfiles: {
         '魏月华': {
@@ -400,28 +408,92 @@ window.CTEMap.closeAllPopups = function() {
     window.CTEMap.closeTravelMenu();
 };
 
+// [修改] 打开出行菜单，重置状态并根据地点加载默认NPC
 window.CTEMap.openTravelMenu = function(destination) {
     window.CTEMap.currentDestination = destination;
+    
+    // 重置临时NPC状态
+    window.CTEMap.tempNPCState = { enabled: false, content: '' };
+    
+    // 获取当前地点默认的NPC (如果没有定义，则为空字符串)
+    const defaultNPC = window.CTEMap.npcDefaults[destination] || '';
+
     const box = $('#travel-menu-overlay');
     box.find('.travel-options').html(`
+        <!-- 新增: NPC 遇见选项 -->
+        <div style="margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                <span style="color:#aaa; font-size:13px;">是否遇见NPC？</span>
+                <div>
+                    <button id="btn-npc-yes" class="cte-btn" style="font-size:12px; padding:2px 8px; margin-right:5px; border-color:#666;" onclick="window.CTEMap.toggleNPC(true, '${defaultNPC}')">是</button>
+                    <button id="btn-npc-no" class="cte-btn" style="font-size:12px; padding:2px 8px; background:#b38b59; color:#1a1a1a;" onclick="window.CTEMap.toggleNPC(false)">否</button>
+                </div>
+            </div>
+            <input type="text" id="npc-input" class="travel-input" style="display:none; font-size:13px; margin-bottom:0;" placeholder="请输入遇见的人 (例如: 粉丝)" value="${defaultNPC}">
+        </div>
+
         <button class="cte-btn" onclick="window.CTEMap.confirmTravel(true)">👤 独自前往</button>
-        <button class="cte-btn" onclick="window.CTEMap.showCompanionInput()">👥 和……一起前往</button>
+        <!-- [修改] 点击按钮后不再直接跳转，而是先保存状态 -->
+        <button class="cte-btn" onclick="window.CTEMap.prepareCompanionInput()">👥 和……一起前往</button>
         <button class="cte-btn" style="margin-top: 10px; border-color: #666; color: #888;" onclick="window.CTEMap.closeTravelMenu()">关闭</button>
     `);
     box.css('display', 'flex');
 };
 
+// [新增] 切换NPC输入框显示状态
+window.CTEMap.toggleNPC = function(enable, defaultText) {
+    const input = document.getElementById('npc-input');
+    const btnYes = document.getElementById('btn-npc-yes');
+    const btnNo = document.getElementById('btn-npc-no');
+
+    window.CTEMap.tempNPCState.enabled = enable;
+
+    if (enable) {
+        input.style.display = 'block';
+        // 只有当输入框为空且有默认值时才填充，避免覆盖用户已修改的内容
+        if (defaultText && !input.value) input.value = defaultText;
+        
+        // 更新按钮样式
+        btnYes.style.background = '#b38b59';
+        btnYes.style.color = '#1a1a1a';
+        btnYes.style.borderColor = '#b38b59';
+        
+        btnNo.style.background = 'transparent';
+        btnNo.style.color = '#e0c5a1';
+        btnNo.style.borderColor = '#666';
+    } else {
+        input.style.display = 'none';
+        
+        // 更新按钮样式
+        btnNo.style.background = '#b38b59';
+        btnNo.style.color = '#1a1a1a';
+        btnNo.style.borderColor = '#b38b59';
+
+        btnYes.style.background = 'transparent';
+        btnYes.style.color = '#e0c5a1';
+        btnYes.style.borderColor = '#666';
+    }
+};
+
+// [新增] 在跳转到同伴输入界面前，保存当前界面的NPC设置
+window.CTEMap.prepareCompanionInput = function() {
+    const npcInput = document.getElementById('npc-input');
+    if (npcInput && window.CTEMap.tempNPCState.enabled) {
+        window.CTEMap.tempNPCState.content = npcInput.value.trim();
+    }
+    window.CTEMap.showCompanionInput();
+}
+
 window.CTEMap.showCompanionInput = function() {
     $('#travel-menu-overlay .travel-options').html(`
         <p style="color: #888; margin: 0 0 10px 0;">和谁一起去？</p>
         <input type="text" id="companion-name" class="travel-input" placeholder="输入角色姓名">
-        <!-- [修改] 点击按钮后不再直接确认，而是跳转到活动选择 -->
         <button class="cte-btn" onclick="window.CTEMap.validateAndShowActivities()">🤝 一起前往</button>
         <button class="cte-btn" style="margin-top: 10px; border-color: #666; color: #888;" onclick="window.CTEMap.openTravelMenu('${window.CTEMap.currentDestination}')">返回</button>
     `);
 };
 
-// [新增] 验证姓名并显示活动菜单
+// 验证姓名并显示活动菜单
 window.CTEMap.validateAndShowActivities = function() {
     const name = $('#companion-name').val();
     if (!name) return alert("请输入姓名");
@@ -433,9 +505,8 @@ window.CTEMap.validateAndShowActivities = function() {
     window.CTEMap.showActivityMenu();
 };
 
-// [新增] 显示活动选择菜单
+// 显示活动选择菜单
 window.CTEMap.showActivityMenu = function() {
-    // [修改] 新增了更多活动选项
     const activities = ['训练', '开会', '购物', '闲逛', '吃饭', '喝酒', '约会', '做爱', '运动', '直播', '拍摄节目', '接受媒体采访'];
     
     // 生成活动按钮网格
@@ -473,13 +544,20 @@ window.CTEMap.goToCustomDestination = function() {
     }
 };
 
-// [修改] 只处理独自前往的逻辑，多人前往逻辑移至 finalizeTravel
+// [修改] 独自前往逻辑：增加NPC文本
 window.CTEMap.confirmTravel = function(isAlone) {
     const dest = window.CTEMap.currentDestination;
-    let text = "";
-    
+    let npcText = '';
+
+    // 如果启用了NPC选项，获取输入内容
+    const npcInput = document.getElementById('npc-input');
+    if (npcInput && window.CTEMap.tempNPCState.enabled) {
+         const val = npcInput.value.trim();
+         if (val) npcText = `，遇见了${val}`;
+    }
+
     if (isAlone) {
-        text = `{{user}} 决定独自前往${dest}。`;
+        let text = `{{user}} 决定独自前往${dest}${npcText}。`;
         if (stContext) {
             stContext.executeSlashCommandsWithOptions(`/setinput ${text}`);
             window.CTEMap.closeAllPopups();
@@ -487,7 +565,7 @@ window.CTEMap.confirmTravel = function(isAlone) {
     }
 };
 
-// [新增] 处理双人前往的最终确认逻辑
+// [修改] 多人前往逻辑：增加NPC文本
 window.CTEMap.finalizeTravel = function(activity) {
     const dest = window.CTEMap.currentDestination;
     let finalActivity = activity;
@@ -501,8 +579,14 @@ window.CTEMap.finalizeTravel = function(activity) {
 
     const name = window.CTEMap.currentCompanion;
     
-    // 生成最终文本：{{user}} 邀请 [同伴] 一起前往 [地点]，[活动]。
-    const text = `{{user}} 邀请 ${name} 一起前往${dest}，${finalActivity}。`;
+    // 检查是否有之前保存的NPC信息
+    let npcText = '';
+    if (window.CTEMap.tempNPCState.enabled && window.CTEMap.tempNPCState.content) {
+        npcText = `，期间遇见了${window.CTEMap.tempNPCState.content}`;
+    }
+    
+    // 生成最终文本
+    const text = `{{user}} 邀请 ${name} 一起前往${dest}，${finalActivity}${npcText}。`;
     
     if (stContext) {
         stContext.executeSlashCommandsWithOptions(`/setinput ${text}`);

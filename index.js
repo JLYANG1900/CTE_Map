@@ -316,7 +316,7 @@ window.CTEMap.switchView = function(viewName, btn) {
     }
 };
 
-// [新增] 从ST聊天记录中提取 status_top 并渲染行程表
+// [修改] 从ST聊天记录中提取 status_top 并渲染行程表
 window.CTEMap.refreshSchedule = async function() {
     const statusEl = $('#cte-schedule-status');
     const container = $('#cte-timeline-container');
@@ -350,8 +350,24 @@ window.CTEMap.refreshSchedule = async function() {
         return;
     }
 
+    // [修改] 增加筛选逻辑：只提取“今日安排”之后的内容
+    const targetKeyword = "今日安排";
+    const keywordIndex = foundContent.indexOf(targetKeyword);
+    
+    if (keywordIndex === -1) {
+         statusEl.text(`未找到“${targetKeyword}”`);
+         container.html(`<p style="text-align:center; color:#666; margin-top:50px;">在 &lt;status_top&gt; 信息中未找到“${targetKeyword}”关键词。</p>`);
+         return;
+    }
+
+    // 截取关键词之后的内容 (keywordIndex + 长度 确保跳过“今日安排”这四个字)
+    let scheduleContent = foundContent.substring(keywordIndex + targetKeyword.length);
+    
+    // 清理开头可能存在的冒号、空格、换行符等，保持内容整洁
+    scheduleContent = scheduleContent.replace(/^[:：\s]+/, '').trim();
+
     statusEl.text('行程安排 (已同步)');
-    const items = window.CTEMap.parseSchedule(foundContent);
+    const items = window.CTEMap.parseSchedule(scheduleContent);
     window.CTEMap.renderSchedule(items);
 };
 

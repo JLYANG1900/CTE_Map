@@ -7,8 +7,12 @@ let stContext = null;
 window.CTEMap = {
     currentDestination: '',
     currentCompanion: '', 
+    currentScheduleItem: '', // [新增] 暂存当前要执行的行程内容
     // 暂存NPC设置状态
     tempNPCState: { enabled: false, content: '' },
+    // 预定义的可选角色列表
+    availableParticipants: ['{{user}}', '秦述', '司洛', '鹿言', '魏星泽', '周锦宁', '谌绪', '孟明赫', '亓谢', '魏月华', '桑洛凡'],
+    
     // 地点对应的默认NPC配置
     npcDefaults: {
         '机场': '粉丝、工作人员、其他团队成员',
@@ -372,9 +376,6 @@ window.CTEMap.refreshSchedule = async function() {
 };
 
 // [新增] 解析行程文本
-// 假设格式为每行一个项目，或者像 HTML 那样有时间。
-// 这里做一个通用的解析：尝试提取 "时间" 和 "内容"
-// 如果每一行都包含 ":" 或 "："，则前半部分为时间，后半部分为内容
 window.CTEMap.parseSchedule = function(text) {
     const lines = text.split('\n').filter(line => line.trim() !== '');
     const items = [];
@@ -421,7 +422,6 @@ window.CTEMap.renderSchedule = function(items) {
         const tagMatch = displayContent.match(/[\(\[\（](.*?)[\)\]\）]/);
         if (tagMatch) {
             // 将提取到的标签移除，单独显示
-            // displayContent = displayContent.replace(tagMatch[0], '');
             tagsHtml = `<span class="cte-tag">${tagMatch[1]}</span>`;
         }
 
@@ -433,10 +433,8 @@ window.CTEMap.renderSchedule = function(items) {
                         <span>${displayContent}</span>
                         ${tagsHtml}
                     </div>
-                    <!-- 如果有详细描述，可以在解析时扩展，这里暂时只显示一行 -->
-                    <!-- <div class="cte-schedule-desc">备注信息...</div> -->
                     
-                    <button class="cte-exec-btn" onclick="window.CTEMap.executeScheduleItem('${item.raw.replace(/'/g, "\\'")}')">
+                    <button class="cte-exec-btn" onclick="window.CTEMap.openParticipantSelection('${item.raw.replace(/'/g, "\\'")}')">
                         ⚡ 执行行程
                     </button>
                 </div>
@@ -446,16 +444,66 @@ window.CTEMap.renderSchedule = function(items) {
     });
 };
 
-// [新增] 执行行程
-window.CTEMap.executeScheduleItem = function(itemText) {
-    const text = `时间跳跃，推进剧情至：${itemText}`;
+// [修改] 打开参与者选择弹窗
+window.CTEMap.openParticipantSelection = function(itemText) {
+    window.CTEMap.currentScheduleItem = itemText;
+    
+    // 渲染复选框列表
+    const listContainer = $('#cte-participant-list');
+    listContainer.empty();
+    
+    window.CTEMap.availableParticipants.forEach((name, index) => {
+        const id = `participant-${index}`;
+        // 默认勾选 {{user}}
+        const checked = name === '{{user}}' ? 'checked' : '';
+        const displayLabel = name === '{{user}}' ? '你 (User)' : name;
+        
+        const html = `
+            <div class="participant-item">
+                <input type="checkbox" id="${id}" value="${name}" class="cte-checkbox" ${checked}>
+                <label for="${id}">${displayLabel}</label>
+            </div>
+        `;
+        listContainer.append(html);
+    });
+    
+    // 清空自定义输入框
+    $('#participant-custom').val('');
+
+    // 显示弹窗
+    const overlay = $('#cte-overlay');
+    if(overlay.length) overlay.show();
+    $('#cte-participant-popup').show();
+};
+
+// [新增] 确认执行行程
+window.CTEMap.confirmExecution = function() {
+    // 获取勾选的角色
+    const selected = [];
+    $('.cte-checkbox:checked').each(function() {
+        selected.push($(this).val());
+    });
+    
+    // 获取自定义角色
+    const custom = $('#participant-custom').val().trim();
+    if (custom) {
+        selected.push(custom);
+    }
+    
+    if (selected.length === 0) {
+        alert("请至少选择一位参与者！");
+        return;
+    }
+    
+    // 构建文本
+    const participantsText = selected.join(', ');
+    const text = `${participantsText} 开始执行行程：${window.CTEMap.currentScheduleItem}`;
     
     if (stContext) {
         stContext.executeSlashCommandsWithOptions(`/setinput ${text}`);
-        // 可选：执行后自动关闭面板
-        // $('#cte-map-panel').fadeOut();
+        window.CTEMap.closeAllPopups();
     } else {
-        alert("无法连接到 SillyTavern，请确保插件已正确加载。");
+        alert("无法连接到 SillyTavern。");
     }
 };
 
@@ -926,4 +974,3 @@ window.CTEMap.openRooftopMenu = function() {
         </div>
     `;
 };
-

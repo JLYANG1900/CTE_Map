@@ -435,7 +435,8 @@ window.CTEMap.validateAndShowActivities = function() {
 
 // [新增] 显示活动选择菜单
 window.CTEMap.showActivityMenu = function() {
-    const activities = ['训练', '开会', '购物', '闲逛', '吃饭', '喝酒', '约会', '做爱'];
+    // [修改] 新增了更多活动选项
+    const activities = ['训练', '开会', '购物', '闲逛', '吃饭', '喝酒', '约会', '做爱', '运动', '直播', '拍摄节目', '接受媒体采访'];
     
     // 生成活动按钮网格
     let buttonsHtml = activities.map(act => 

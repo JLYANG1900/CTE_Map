@@ -7,9 +7,9 @@ let stContext = null;
 window.CTEMap = {
     currentDestination: '',
     currentCompanion: '', 
-    // [新增] 暂存NPC设置状态
+    // 暂存NPC设置状态
     tempNPCState: { enabled: false, content: '' },
-    // [新增] 地点对应的默认NPC配置
+    // 地点对应的默认NPC配置
     npcDefaults: {
         '机场': '粉丝、工作人员、其他团队成员',
         '京港电视台': '粉丝、工作人员、其他团队成员',
@@ -207,7 +207,7 @@ async function initializeExtension() {
     link.href = `${extensionPath}/style.css`;
     document.head.appendChild(link);
 
-    // [修改] 更新了 title 提示和 cursor 样式，表明可拖动
+    // [修改] 顶部导航栏增加了“地图”和“行程表”的切换按钮
     const panelHTML = `
         <div id="cte-toggle-btn" title="点击打开 / 长按拖动" 
              style="position:fixed; top:130px; left:10px; z-index:9000; width:40px; height:40px; background:#b38b59; border-radius:50%; display:flex; justify-content:center; align-items:center; cursor:move; box-shadow:0 4px 10px rgba(0,0,0,0.3); color:#fff; font-size:20px;">
@@ -216,7 +216,11 @@ async function initializeExtension() {
         <div id="cte-map-panel">
             <div id="cte-drag-handle">
                 <span>CTE 档案地图</span>
-                <span id="cte-close-btn">❌</span>
+                <div class="cte-nav-group">
+                    <button class="cte-nav-btn active" onclick="window.CTEMap.switchView('map', this)">地图</button>
+                    <button class="cte-nav-btn" onclick="window.CTEMap.switchView('schedule', this)">行程表</button>
+                    <span id="cte-close-btn" style="cursor:pointer; margin-left:10px;">❌</span>
+                </div>
             </div>
             <div id="cte-content-area">Loading Map...</div>
         </div>
@@ -259,6 +263,10 @@ async function initializeExtension() {
             panel.fadeIn(200, function() {
                 // 面板显示后立即修正位置
                 fixPanelPosition();
+                // 每次打开如果是在行程表界面，自动刷新一次
+                if ($('#cte-view-schedule').is(':visible')) {
+                    window.CTEMap.refreshSchedule();
+                }
             });
         }
     });
@@ -291,6 +299,149 @@ async function initializeExtension() {
     // [新增] 设置窗口变化监听
     setupResizeListener();
 }
+
+// [新增] 视图切换功能 (地图/行程表)
+window.CTEMap.switchView = function(viewName, btn) {
+    // 切换按钮样式
+    $('.cte-nav-btn').removeClass('active');
+    $(btn).addClass('active');
+
+    // 切换内容显示
+    $('.cte-view').removeClass('active');
+    $(`#cte-view-${viewName}`).addClass('active');
+
+    // 如果切换到行程表，自动刷新数据
+    if (viewName === 'schedule') {
+        window.CTEMap.refreshSchedule();
+    }
+};
+
+// [新增] 从ST聊天记录中提取 status_top 并渲染行程表
+window.CTEMap.refreshSchedule = async function() {
+    const statusEl = $('#cte-schedule-status');
+    const container = $('#cte-timeline-container');
+    
+    statusEl.text('正在读取最新状态...');
+    
+    if (!stContext) {
+        statusEl.text('错误：无法连接到 SillyTavern 上下文。');
+        return;
+    }
+
+    // 获取当前聊天记录
+    // 通常可以通过 SillyTavern.getContext().chat 获取
+    // 我们需要从后往前找，找到第一个包含 <status_top> 的消息
+    const chat = stContext.chat || [];
+    let foundContent = null;
+
+    for (let i = chat.length - 1; i >= 0; i--) {
+        const msg = chat[i].mes;
+        // 简单的正则匹配 <status_top> 内容
+        const match = msg.match(/<status_top>([\s\S]*?)<\/status_top>/i);
+        if (match) {
+            foundContent = match[1].trim();
+            break;
+        }
+    }
+
+    if (!foundContent) {
+        statusEl.text('未找到最新行程信息');
+        container.html('<p style="text-align:center; color:#666; margin-top:50px;">在聊天记录中未找到 &lt;status_top&gt; 标签。</p>');
+        return;
+    }
+
+    statusEl.text('行程安排 (已同步)');
+    const items = window.CTEMap.parseSchedule(foundContent);
+    window.CTEMap.renderSchedule(items);
+};
+
+// [新增] 解析行程文本
+// 假设格式为每行一个项目，或者像 HTML 那样有时间。
+// 这里做一个通用的解析：尝试提取 "时间" 和 "内容"
+// 如果每一行都包含 ":" 或 "："，则前半部分为时间，后半部分为内容
+window.CTEMap.parseSchedule = function(text) {
+    const lines = text.split('\n').filter(line => line.trim() !== '');
+    const items = [];
+
+    lines.forEach(line => {
+        // 尝试匹配时间格式 (例如 19:30, 20:00, [19:00])
+        // 简单的逻辑：分隔符为冒号或者空格
+        let time = '';
+        let content = line;
+        
+        // 匹配行首的时间 (例如 19:30 CTE开场, 19:30 - CTE开场)
+        const timeMatch = line.match(/^\[?(\d{1,2}:\d{2})\]?\s*[-:：]?\s*(.*)/);
+        
+        if (timeMatch) {
+            time = timeMatch[1];
+            content = timeMatch[2];
+        } else {
+            // 如果没有明确时间，使用默认标记
+            time = '待定';
+        }
+
+        items.push({ time, content, raw: line });
+    });
+
+    return items;
+};
+
+// [新增] 渲染行程时间轴
+window.CTEMap.renderSchedule = function(items) {
+    const container = $('#cte-timeline-container');
+    container.empty();
+
+    if (items.length === 0) {
+        container.html('<p style="text-align:center; color:#666;">行程单为空。</p>');
+        return;
+    }
+
+    items.forEach(item => {
+        // 尝试提取"标签" (例如括号里的内容)
+        let displayContent = item.content;
+        let tagsHtml = '';
+        
+        // 提取 (tag) 或 [tag]
+        const tagMatch = displayContent.match(/[\(\[\（](.*?)[\)\]\）]/);
+        if (tagMatch) {
+            // 将提取到的标签移除，单独显示
+            // displayContent = displayContent.replace(tagMatch[0], '');
+            tagsHtml = `<span class="cte-tag">${tagMatch[1]}</span>`;
+        }
+
+        const html = `
+            <div class="cte-timeline-item">
+                <div class="cte-timeline-time">${item.time}</div>
+                <div class="cte-timeline-content">
+                    <div class="cte-schedule-title">
+                        <span>${displayContent}</span>
+                        ${tagsHtml}
+                    </div>
+                    <!-- 如果有详细描述，可以在解析时扩展，这里暂时只显示一行 -->
+                    <!-- <div class="cte-schedule-desc">备注信息...</div> -->
+                    
+                    <button class="cte-exec-btn" onclick="window.CTEMap.executeScheduleItem('${item.raw.replace(/'/g, "\\'")}')">
+                        ⚡ 执行行程
+                    </button>
+                </div>
+            </div>
+        `;
+        container.append(html);
+    });
+};
+
+// [新增] 执行行程
+window.CTEMap.executeScheduleItem = function(itemText) {
+    const text = `{{user}} 开始执行行程：${itemText}`;
+    
+    if (stContext) {
+        stContext.executeSlashCommandsWithOptions(`/setinput ${text}`);
+        // 可选：执行后自动关闭面板
+        // $('#cte-map-panel').fadeOut();
+    } else {
+        alert("无法连接到 SillyTavern，请确保插件已正确加载。");
+    }
+};
 
 function bindMapEvents() {
     const mapContainer = document.getElementById('cte-map-container');
@@ -408,7 +559,6 @@ window.CTEMap.closeAllPopups = function() {
     window.CTEMap.closeTravelMenu();
 };
 
-// [修改] 打开出行菜单，重置状态并根据地点加载默认NPC
 window.CTEMap.openTravelMenu = function(destination) {
     window.CTEMap.currentDestination = destination;
     
@@ -440,7 +590,6 @@ window.CTEMap.openTravelMenu = function(destination) {
     box.css('display', 'flex');
 };
 
-// [新增] 切换NPC输入框显示状态
 window.CTEMap.toggleNPC = function(enable, defaultText) {
     const input = document.getElementById('npc-input');
     const btnYes = document.getElementById('btn-npc-yes');
@@ -475,7 +624,6 @@ window.CTEMap.toggleNPC = function(enable, defaultText) {
     }
 };
 
-// [新增] 在跳转到同伴输入界面前，保存当前界面的NPC设置
 window.CTEMap.prepareCompanionInput = function() {
     const npcInput = document.getElementById('npc-input');
     if (npcInput && window.CTEMap.tempNPCState.enabled) {
@@ -493,7 +641,6 @@ window.CTEMap.showCompanionInput = function() {
     `);
 };
 
-// 验证姓名并显示活动菜单
 window.CTEMap.validateAndShowActivities = function() {
     const name = $('#companion-name').val();
     if (!name) return alert("请输入姓名");
@@ -505,7 +652,6 @@ window.CTEMap.validateAndShowActivities = function() {
     window.CTEMap.showActivityMenu();
 };
 
-// 显示活动选择菜单
 window.CTEMap.showActivityMenu = function() {
     const activities = ['训练', '开会', '购物', '闲逛', '吃饭', '喝酒', '约会', '做爱', '运动', '直播', '拍摄节目', '接受媒体采访'];
     
@@ -544,12 +690,10 @@ window.CTEMap.goToCustomDestination = function() {
     }
 };
 
-// [修改] 独自前往逻辑：增加NPC文本
 window.CTEMap.confirmTravel = function(isAlone) {
     const dest = window.CTEMap.currentDestination;
     let npcText = '';
 
-    // 如果启用了NPC选项，获取输入内容
     const npcInput = document.getElementById('npc-input');
     if (npcInput && window.CTEMap.tempNPCState.enabled) {
          const val = npcInput.value.trim();
@@ -565,12 +709,10 @@ window.CTEMap.confirmTravel = function(isAlone) {
     }
 };
 
-// [修改] 多人前往逻辑：增加NPC文本
 window.CTEMap.finalizeTravel = function(activity) {
     const dest = window.CTEMap.currentDestination;
     let finalActivity = activity;
     
-    // 如果没有传入具体活动，说明是自定义输入
     if (!finalActivity) {
         finalActivity = $('#custom-activity').val();
     }
@@ -579,13 +721,11 @@ window.CTEMap.finalizeTravel = function(activity) {
 
     const name = window.CTEMap.currentCompanion;
     
-    // 检查是否有之前保存的NPC信息
     let npcText = '';
     if (window.CTEMap.tempNPCState.enabled && window.CTEMap.tempNPCState.content) {
         npcText = `，期间遇见了${window.CTEMap.tempNPCState.content}`;
     }
     
-    // 生成最终文本
     const text = `{{user}} 邀请 ${name} 一起前往${dest}，${finalActivity}${npcText}。`;
     
     if (stContext) {
@@ -632,7 +772,6 @@ window.CTEMap.openThirdLevelMenu = function(roomName, floorTitle, floorItems) {
     if (profile) {
         // 特殊处理"你"的房间
         if (roomName === '你') {
-            // 尝试从localStorage读取用户自定义头像
             const savedAvatar = localStorage.getItem('cte_user_avatar');
             const avatarSrc = savedAvatar || '';
             const hasAvatar = avatarSrc !== '';
@@ -683,7 +822,6 @@ window.CTEMap.openThirdLevelMenu = function(roomName, floorTitle, floorItems) {
                 </div>
             `;
         } else {
-            // 其他角色房间：显示角色图片和详细资料
             contentHTML = `
                 <div class="character-room-detail">
                     <div class="character-portrait">
@@ -718,7 +856,6 @@ window.CTEMap.openThirdLevelMenu = function(roomName, floorTitle, floorItems) {
             `;
         }
     } else {
-        // 普通房间：保持原有样式
         contentHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%;">
                 <p style="text-align:justify; font-size:14px; line-height:1.6;">${desc}</p>
@@ -733,41 +870,30 @@ window.CTEMap.openThirdLevelMenu = function(roomName, floorTitle, floorItems) {
     document.getElementById('temp-back-btn').onclick = () => window.CTEMap.openSubMenu(floorTitle, floorItems);
 };
 
-// 用户头像上传功能
 window.CTEMap.uploadUserAvatar = function(input) {
     if (input.files && input.files[0]) {
         const file = input.files[0];
-        
-        // 检查文件大小（限制为2MB）
         if (file.size > 2 * 1024 * 1024) {
             alert('图片大小不能超过2MB，请选择较小的图片');
             return;
         }
-        
         const reader = new FileReader();
         reader.onload = function(e) {
             const imageData = e.target.result;
-            
-            // 保存到localStorage
             try {
                 localStorage.setItem('cte_user_avatar', imageData);
-                
-                // 刷新当前界面
                 window.CTEMap.openThirdLevelMenu('你', '五楼：私人宿舍区', ['秦述', '司洛', '鹿言', '魏星泽', '周锦宁', '谌绪', '孟明赫', '亓谢', '魏月华', '桑洛凡', '你', '公共书房/阅览区']);
             } catch (err) {
                 alert('保存失败，图片可能太大。请尝试使用较小的图片。');
-                console.error('[CTE Map] Avatar save error:', err);
             }
         };
         reader.readAsDataURL(file);
     }
 };
 
-// 删除用户头像
 window.CTEMap.deleteUserAvatar = function() {
     if (confirm('确定要删除头像吗？')) {
         localStorage.removeItem('cte_user_avatar');
-        // 刷新当前界面
         window.CTEMap.openThirdLevelMenu('你', '五楼：私人宿舍区', ['秦述', '司洛', '鹿言', '魏星泽', '周锦宁', '谌绪', '孟明赫', '亓谢', '魏月华', '桑洛凡', '你', '公共书房/阅览区']);
     }
 };

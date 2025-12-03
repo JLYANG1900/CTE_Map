@@ -30,10 +30,10 @@ window.CTEMap = {
 
     // 国家地图城市数据
     nationalCities: [
-        { id: 'jinggang', name: '京港', icon: 'fa-landmark-dome', top: '20%', left: '70%', isReturn: true, info: '<strong><i class="fa-solid fa-crown"></i> 权力漩涡:</strong> 首都，政治中心。远洋、万城、隆桑、盛华四大集团总部所在地。祁寒川的权力根基，也是你商业帝国的指挥中心。目前，东区深水泊位项目已解决，城市基建将迎来新一轮扩张。' },
+        { id: 'jinggang', name: '京港', icon: 'fa-landmark-dome', top: '20%', left: '70%', isReturn: true, info: '<strong><i class="fa-solid fa-crown"></i> 权力漩涡:</strong> 首都，政治中心。远洋、万城、隆桑、盛华四大集团总部所在地。国家的权力根基，也是你商业帝国的指挥中心。目前，东区深水泊位项目已解决，城市基建将迎来新一轮扩张。' },
         { id: 'langjing', name: '琅京', icon: 'fa-gem', top: '40%', left: '80%', info: '<strong><i class="fa-solid fa-coins"></i> 豪门金库:</strong> 金融与地产重镇，钰明珠宝总部。老钱家族盘踞，是周锦宁母亲家族势力的核心。近期慈善音乐节在此举办，CTE的声望达到新高。' },
         { id: 'shenzhou', name: '深州', icon: 'fa-microchip', top: '80%', left: '75%', info: '<strong><i class="fa-solid fa-chart-line"></i> 科技前沿:</strong> 沿海经济特区，高新科技产业发达。你在此地成功收服陈默，为远洋集团的供应链增添了重要一环。即将到来的“潮音盛典”将是CTE展示创新舞台的绝佳机会。' },
-        { id: 'haizhou', name: '海洲', icon: 'fa-anchor', top: '75%', left: '55%', info: '<strong><i class="fa-solid fa-skull-crossbones"></i> 灰色地带:</strong> 港口城市，地下势力活跃。洪兴社陈伯在此拥有绝对话语权。此地是‘天罗地网’计划的关键棋子，也是祁闻砚海外资金流入的重要通道。' },
+        { id: 'haizhou', name: '海洲', icon: 'fa-anchor', top: '75%', left: '55%', info: '<strong><i class="fa-solid fa-skull-crossbones"></i> 灰色地带:</strong> 港口城市，地下势力活跃。洪兴社陈伯在此拥有绝对话语权。此地是‘天罗地网’计划的关键棋子，也是海外非法资金流入的重要通道。' },
         { id: 'taihe', name: '台河', icon: 'fa-book-open', top: '30%', left: '40%', info: '<strong><i class="fa-solid fa-graduation-cap"></i> 学术之城:</strong> 历史名城，名校云集。秦述的故乡，代表着他与之决裂的传统学术家庭。这里的氛围与京港的浮华形成鲜明对比。' },
         { id: 'huashao', name: '化邵', icon: 'fa-industry', top: '50%', left: '20%', info: '<strong><i class="fa-solid fa-wrench"></i> 工业心脏:</strong> 重工业城市，工人阶层为主。代表着国家经济的基石，也是政策变动最敏感的区域之一。远洋集团的某些大宗商品业务与此地紧密相关。' },
         { id: 'yucheng', name: '玉城', icon: 'fa-martini-glass-citrus', top: '65%', left: '35%', info: '<strong><i class="fa-solid fa-sun"></i> 度假天堂:</strong> 风景优美的旅游胜地，富豪的休闲后花园。这里是资本进行非正式交易和人脉巩固的温床。' },
@@ -1135,3 +1135,4 @@ window.CTEMap.closeAllPopups = function() {
     
     window.CTEMap.closeTravelMenu(isTravelMenuVisible);
 };
+

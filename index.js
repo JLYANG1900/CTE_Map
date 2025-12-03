@@ -2,6 +2,8 @@ const extensionName = "CTE_Map";
 const extensionPath = `scripts/extensions/third-party/${extensionName}`;
 
 let stContext = null;
+// [新增] 默认国家地图背景
+const DEFAULT_NATIONAL_BG = "https://files.catbox.moe/8z3pnp.png";
 
 // 定义全局命名空间
 window.CTEMap = {
@@ -9,9 +11,9 @@ window.CTEMap = {
     currentCompanion: '', 
     currentScheduleItem: '', 
     
-    // [新增] 标记是否处于“行程执行-选择地点”模式
+    // 标记是否处于“行程执行-选择地点”模式
     isSelectingForSchedule: false,
-    // [新增] 暂存行程参与者
+    // 暂存行程参与者
     tempScheduleParticipants: [],
 
     // 暂存NPC设置状态
@@ -26,7 +28,7 @@ window.CTEMap = {
         '私人会所': '社交名流'
     },
 
-    // [新增] 国家地图城市数据
+    // 国家地图城市数据
     nationalCities: [
         { id: 'jinggang', name: '京港', icon: 'fa-landmark-dome', top: '20%', left: '70%', isReturn: true, info: '<strong><i class="fa-solid fa-crown"></i> 权力漩涡:</strong> 首都，政治中心。远洋、万城、隆桑、盛华四大集团总部所在地。祁寒川的权力根基，也是你商业帝国的指挥中心。目前，东区深水泊位项目已解决，城市基建将迎来新一轮扩张。' },
         { id: 'langjing', name: '琅京', icon: 'fa-gem', top: '40%', left: '80%', info: '<strong><i class="fa-solid fa-coins"></i> 豪门金库:</strong> 金融与地产重镇，钰明珠宝总部。老钱家族盘踞，是周锦宁母亲家族势力的核心。近期慈善音乐节在此举办，CTE的声望达到新高。' },
@@ -151,42 +153,33 @@ const initInterval = setInterval(() => {
 }, 500);
 
 /**
- * [修复] 动态计算并设置面板位置
- * 解决手机端因浏览器地址栏/工具栏导致的界面上浮问题
+ * 动态计算并设置面板位置
  */
 function fixPanelPosition() {
     const panel = document.getElementById('cte-map-panel');
     if (!panel) return;
 
-    // 获取真实可视区域尺寸
     const viewportHeight = window.innerHeight;
     const viewportWidth = window.innerWidth;
     
-    // 获取面板尺寸
     const panelRect = panel.getBoundingClientRect();
     const panelHeight = panelRect.height || panel.offsetHeight;
     const panelWidth = panelRect.width || panel.offsetWidth;
 
-    // 判断是否为移动端（宽度小于 768px）
     const isMobile = viewportWidth < 768;
 
     if (isMobile) {
-        // 移动端：使用 fixed 定位，基于真实 viewport 计算
-        // 清除 CSS 中的 transform 居中，改用直接定位
         panel.style.position = 'fixed';
         panel.style.transform = 'none';
         panel.style.top = Math.max(10, (viewportHeight - panelHeight) / 2) + 'px';
         panel.style.left = Math.max(5, (viewportWidth - panelWidth) / 2) + 'px';
         
-        // 确保面板不会超出屏幕顶部
         if (parseFloat(panel.style.top) < 10) {
             panel.style.top = '10px';
         }
         
-        // 移动端限制最大高度，防止超出可视区域
         panel.style.maxHeight = (viewportHeight - 20) + 'px';
     } else {
-        // 桌面端：恢复原版 CSS 居中效果
         panel.style.position = 'fixed';
         panel.style.top = '50%';
         panel.style.left = '50%';
@@ -195,9 +188,6 @@ function fixPanelPosition() {
     }
 }
 
-/**
- * [新增] 监听窗口变化，实时调整面板位置
- */
 function setupResizeListener() {
     let resizeTimeout;
     window.addEventListener('resize', () => {
@@ -210,7 +200,6 @@ function setupResizeListener() {
         }, 100);
     });
 
-    // 针对移动端浏览器地址栏显示/隐藏的特殊处理
     window.addEventListener('orientationchange', () => {
         setTimeout(fixPanelPosition, 300);
     });
@@ -219,11 +208,9 @@ function setupResizeListener() {
 async function initializeExtension() {
     console.log("[CTE Map] Initializing...");
 
-    // 清理可能存在的旧元素，防止重复加载导致的ID冲突
     $('#cte-map-panel').remove();
     $('#cte-toggle-btn').remove();
     $('link[href*="CTE_Map/style.css"]').remove();
-    // [新增] 移除旧的 FontAwesome 防止重复
     $('link[href*="font-awesome"]').remove();
 
     const link = document.createElement('link');
@@ -231,13 +218,11 @@ async function initializeExtension() {
     link.href = `${extensionPath}/style.css`;
     document.head.appendChild(link);
 
-    // [新增] 注入 FontAwesome CSS (用于国家地图图标)
     const faLink = document.createElement('link');
     faLink.rel = 'stylesheet';
     faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';
     document.head.appendChild(faLink);
 
-    // [修改] 顶部导航栏增加了“地图”和“行程表”的切换按钮
     const panelHTML = `
         <div id="cte-toggle-btn" title="点击打开 / 长按拖动" 
              style="position:fixed; top:130px; left:10px; z-index:9000; width:40px; height:40px; background:#b38b59; border-radius:50%; display:flex; justify-content:center; align-items:center; cursor:move; box-shadow:0 4px 10px rgba(0,0,0,0.3); color:#fff; font-size:20px;">
@@ -266,22 +251,18 @@ async function initializeExtension() {
         bindMapEvents();
         loadSavedPositions();
         loadSavedBg();
-        // [新增] 初始化国家地图
+        // 初始化国家地图与背景
         window.CTEMap.initNationalMap();
+        window.CTEMap.loadSavedNationalBg();
 
     } catch (e) {
         console.error("[CTE Map] Error:", e);
         $('#cte-content-area').html(`<p style="padding:20px; color:white;">无法加载地图文件 (map.html)。<br>请检查控制台获取详细错误。</p>`);
     }
 
-    // =================================================
-    // [新增] 悬浮图标拖拽与点击冲突处理逻辑
-    // =================================================
     let isIconDragging = false;
 
-    // [修复] 打开面板时调用 fixPanelPosition
     $('#cte-toggle-btn').on('click', (e) => {
-        // [修改] 如果被标记为正在拖拽，则不执行打开面板的操作
         if (isIconDragging) {
             e.preventDefault();
             e.stopPropagation();
@@ -293,9 +274,7 @@ async function initializeExtension() {
             panel.fadeOut();
         } else {
             panel.fadeIn(200, function() {
-                // 面板显示后立即修正位置
                 fixPanelPosition();
-                // 每次打开如果是在行程表界面，自动刷新一次
                 if ($('#cte-view-schedule').is(':visible')) {
                     window.CTEMap.refreshSchedule();
                 }
@@ -306,21 +285,17 @@ async function initializeExtension() {
     $('#cte-close-btn').on('click', () => $('#cte-map-panel').fadeOut());
 
     if ($.fn.draggable) {
-        // 主面板拖拽
         $('#cte-map-panel').draggable({ 
             handle: '#cte-drag-handle',
             containment: 'window'
         });
 
-        // [新增] 悬浮图标拖拽初始化
         $('#cte-toggle-btn').draggable({
-            containment: 'window', // 限制在窗口内拖动
+            containment: 'window', 
             start: function() {
-                isIconDragging = true; // 开始拖拽，标记状态
+                isIconDragging = true; 
             },
             stop: function() {
-                // 停止拖拽后，稍微延迟一下再取消标记
-                // 这是为了防止松开鼠标的瞬间触发 click 事件
                 setTimeout(() => {
                     isIconDragging = false;
                 }, 50); 
@@ -328,18 +303,16 @@ async function initializeExtension() {
         });
     }
 
-    // [新增] 设置窗口变化监听
     setupResizeListener();
 }
 
-// [新增] 初始化国家地图 DOM
+// 初始化国家地图 DOM
 window.CTEMap.initNationalMap = function() {
     const mapContainer = document.getElementById('national-game-map');
     const infoContent = document.getElementById('national-info-content');
     
     if (!mapContainer || !infoContent) return;
 
-    // 清空现有内容 (防止重复初始化)
     mapContainer.innerHTML = '';
 
     window.CTEMap.nationalCities.forEach(city => {
@@ -351,14 +324,21 @@ window.CTEMap.initNationalMap = function() {
 
         cityEl.innerHTML = `<i class="fa-solid ${city.icon}"></i><span class="name">${city.name}</span>`;
 
-        // [重点] 点击事件逻辑
+        // 点击事件逻辑
         cityEl.addEventListener('click', () => {
             // 如果点击的是京港 (设置了 isReturn 标记)，则返回城市地图
             if (city.isReturn) {
                  window.CTEMap.switchView('map');
             } else {
-                // 否则显示情报
-                infoContent.innerHTML = `<h2><i class="fa-solid fa-scroll"></i> ${city.name} - 情报简报</h2><ul><li>${city.info}</li></ul>`;
+                // [修改] 显示情报 + 前往按钮
+                let html = `<h2><i class="fa-solid fa-scroll"></i> ${city.name} - 情报简报</h2><ul><li>${city.info}</li></ul>`;
+                // 新增：前往按钮
+                html += `
+                    <div style="text-align:center; margin-top:15px; border-top:1px dashed #666; padding-top:10px;">
+                        <button class="cte-btn" onclick="window.CTEMap.openTravelMenu('${city.name}')" style="width:80%; padding:8px; background:#b38b59; color:#1a1a1a; font-weight:bold; font-size:14px;">🚀 前往 ${city.name}</button>
+                    </div>
+                `;
+                infoContent.innerHTML = html;
             }
         });
 
@@ -366,31 +346,53 @@ window.CTEMap.initNationalMap = function() {
     });
 };
 
-// [修改] 视图切换功能 (地图/行程表/国家地图)
+// [新增] 更换国家地图背景
+window.CTEMap.changeNationalBackground = function(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const bgUrl = e.target.result;
+            $('#national-game-map').css('background-image', `url(${bgUrl})`);
+            localStorage.setItem('cte_national_map_bg', bgUrl);
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+};
+
+// [新增] 恢复默认国家地图背景
+window.CTEMap.resetNationalBackground = function() {
+    $('#national-game-map').css('background-image', `url(${DEFAULT_NATIONAL_BG})`);
+    localStorage.setItem('cte_national_map_bg', DEFAULT_NATIONAL_BG);
+};
+
+// [新增] 加载保存的国家地图背景
+window.CTEMap.loadSavedNationalBg = function() {
+    const saved = localStorage.getItem('cte_national_map_bg');
+    const bg = saved || DEFAULT_NATIONAL_BG;
+    $('#national-game-map').css('background-image', `url(${bg})`);
+};
+
+
+// 视图切换功能 (地图/行程表/国家地图)
 window.CTEMap.switchView = function(viewName, btn) {
-    // 切换按钮样式 (仅当存在对应按钮时)
     $('.cte-nav-btn').removeClass('active');
     if (btn) {
         $(btn).addClass('active');
     } else {
-        // 如果是从内部逻辑跳转 (如国家地图返回)，手动更新顶部导航状态
         const btns = document.querySelectorAll('.cte-nav-btn');
         if (viewName === 'map' && btns[0]) $(btns[0]).addClass('active');
         if (viewName === 'schedule' && btns[1]) $(btns[1]).addClass('active');
-        // 'national-map' 没有顶部导航按钮，所以不需要 activate 任何按钮，或者保持 'map' 激活也可以
     }
 
-    // 切换内容显示
     $('.cte-view').removeClass('active');
     $(`#cte-view-${viewName}`).addClass('active');
 
-    // 如果切换到行程表，自动刷新数据
     if (viewName === 'schedule') {
         window.CTEMap.refreshSchedule();
     }
 };
 
-// [修改] 从ST聊天记录中提取 status_top 并渲染行程表
+// 从ST聊天记录中提取 status_top 并渲染行程表
 window.CTEMap.refreshSchedule = async function() {
     const statusEl = $('#cte-schedule-status');
     const container = $('#cte-timeline-container');
@@ -402,15 +404,11 @@ window.CTEMap.refreshSchedule = async function() {
         return;
     }
 
-    // 获取当前聊天记录
-    // 通常可以通过 SillyTavern.getContext().chat 获取
-    // 我们需要从后往前找，找到第一个包含 <status_top> 的消息
     const chat = stContext.chat || [];
     let foundContent = null;
 
     for (let i = chat.length - 1; i >= 0; i--) {
         const msg = chat[i].mes;
-        // 简单的正则匹配 <status_top> 内容
         const match = msg.match(/<status_top>([\s\S]*?)<\/status_top>/i);
         if (match) {
             foundContent = match[1].trim();
@@ -424,7 +422,6 @@ window.CTEMap.refreshSchedule = async function() {
         return;
     }
 
-    // [修改] 增加筛选逻辑：只提取“今日安排”之后的内容
     const targetKeyword = "今日安排";
     const keywordIndex = foundContent.indexOf(targetKeyword);
     
@@ -434,10 +431,7 @@ window.CTEMap.refreshSchedule = async function() {
          return;
     }
 
-    // 截取关键词之后的内容 (keywordIndex + 长度 确保跳过“今日安排”这四个字)
     let scheduleContent = foundContent.substring(keywordIndex + targetKeyword.length);
-    
-    // 清理开头可能存在的冒号、空格、换行符等，保持内容整洁
     scheduleContent = scheduleContent.replace(/^[:：\s]+/, '').trim();
 
     statusEl.text('行程安排 (已同步)');
@@ -445,25 +439,21 @@ window.CTEMap.refreshSchedule = async function() {
     window.CTEMap.renderSchedule(items);
 };
 
-// [新增] 解析行程文本
+// 解析行程文本
 window.CTEMap.parseSchedule = function(text) {
     const lines = text.split('\n').filter(line => line.trim() !== '');
     const items = [];
 
     lines.forEach(line => {
-        // 尝试匹配时间格式 (例如 19:30, 20:00, [19:00])
-        // 简单的逻辑：分隔符为冒号或者空格
         let time = '';
         let content = line;
         
-        // 匹配行首的时间 (例如 19:30 CTE开场, 19:30 - CTE开场)
         const timeMatch = line.match(/^\[?(\d{1,2}:\d{2})\]?\s*[-:：]?\s*(.*)/);
         
         if (timeMatch) {
             time = timeMatch[1];
             content = timeMatch[2];
         } else {
-            // 如果没有明确时间，使用默认标记
             time = '待定';
         }
 
@@ -473,7 +463,7 @@ window.CTEMap.parseSchedule = function(text) {
     return items;
 };
 
-// [新增] 渲染行程时间轴
+// 渲染行程时间轴
 window.CTEMap.renderSchedule = function(items) {
     const container = $('#cte-timeline-container');
     container.empty();
@@ -484,14 +474,11 @@ window.CTEMap.renderSchedule = function(items) {
     }
 
     items.forEach(item => {
-        // 尝试提取"标签" (例如括号里的内容)
         let displayContent = item.content;
         let tagsHtml = '';
         
-        // 提取 (tag) 或 [tag]
         const tagMatch = displayContent.match(/[\(\[\（](.*?)[\)\]\）]/);
         if (tagMatch) {
-            // 将提取到的标签移除，单独显示
             tagsHtml = `<span class="cte-tag">${tagMatch[1]}</span>`;
         }
 
@@ -514,19 +501,16 @@ window.CTEMap.renderSchedule = function(items) {
     });
 };
 
-// [修改] 打开参与者选择弹窗
+// 打开参与者选择弹窗
 window.CTEMap.openParticipantSelection = function(itemText) {
-    // 重置模式状态，防止混淆
     window.CTEMap.isSelectingForSchedule = false; 
     window.CTEMap.currentScheduleItem = itemText;
     
-    // 渲染复选框列表
     const listContainer = $('#cte-participant-list');
     listContainer.empty();
     
     window.CTEMap.availableParticipants.forEach((name, index) => {
         const id = `participant-${index}`;
-        // 默认勾选 {{user}}
         const checked = name === '{{user}}' ? 'checked' : '';
         const displayLabel = name === '{{user}}' ? '你 (User)' : name;
         
@@ -539,24 +523,20 @@ window.CTEMap.openParticipantSelection = function(itemText) {
         listContainer.append(html);
     });
     
-    // 清空自定义输入框
     $('#participant-custom').val('');
 
-    // 显示弹窗
     const overlay = $('#cte-overlay');
     if(overlay.length) overlay.show();
     $('#cte-participant-popup').show();
 };
 
-// [修改] 收集参与人员，并跳转到地图界面选择地点
+// 收集参与人员，并跳转到地图界面选择地点
 window.CTEMap.proceedToLocationSelection = function() {
-    // 获取勾选的角色
     const selected = [];
     $('.cte-checkbox:checked').each(function() {
         selected.push($(this).val());
     });
     
-    // 获取自定义角色
     const custom = $('#participant-custom').val().trim();
     if (custom) {
         selected.push(custom);
@@ -567,42 +547,33 @@ window.CTEMap.proceedToLocationSelection = function() {
         return;
     }
 
-    // [关键修改] 先关闭弹窗，再设置状态
-    // 如果先设置状态再关闭弹窗，closeAllPopups -> closeTravelMenu 会把 isSelectingForSchedule 重置为 false
     window.CTEMap.closeAllPopups();
 
-    // 保存状态
     window.CTEMap.tempScheduleParticipants = selected;
-    window.CTEMap.isSelectingForSchedule = true; // 标记为行程选择模式
+    window.CTEMap.isSelectingForSchedule = true; 
 
-    // 切换到地图视图
     window.CTEMap.switchView('map');
 };
 
-// [修改] 打开 Travel Menu，根据模式显示不同内容
+// [关键复用] 打开 Travel Menu
+// 这里兼容了国家地图的调用逻辑：传入 destination 为城市名
 window.CTEMap.openTravelMenu = function(destination) {
     window.CTEMap.currentDestination = destination;
     
-    // 重置临时NPC状态
     window.CTEMap.tempNPCState = { enabled: false, content: '' };
     
-    // 获取当前地点默认的NPC (如果没有定义，则为空字符串)
     const defaultNPC = window.CTEMap.npcDefaults[destination] || '';
 
     const box = $('#travel-menu-overlay');
 
-    // 核心判断：是“普通模式”还是“行程执行模式”？
     if (window.CTEMap.isSelectingForSchedule) {
-        // ======================
         // 行程执行模式 UI
-        // ======================
         box.find('.travel-options').html(`
             <div style="text-align:center; color:#e0c5a1; margin-bottom:15px; font-size:14px; border-bottom:1px solid #444; padding-bottom:10px;">
                 正在执行行程：<br>
                 <span style="color:#b38b59; font-weight:bold;">${window.CTEMap.currentScheduleItem}</span>
             </div>
 
-            <!-- NPC 遇见选项 (保持不变) -->
             <div style="margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px;">
                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                     <span style="color:#aaa; font-size:13px;">是否遇见NPC？</span>
@@ -614,17 +585,12 @@ window.CTEMap.openTravelMenu = function(destination) {
                 <input type="text" id="npc-input" class="travel-input" style="display:none; font-size:13px; margin-bottom:0;" placeholder="请输入遇见的人 (例如: 粉丝)" value="${defaultNPC}">
             </div>
 
-            <!-- 仅显示确认按钮 -->
             <button class="cte-btn" onclick="window.CTEMap.finalizeScheduleExecution()" style="background:#b38b59; color:#1a1a1a; font-weight:bold;">✅ 确认执行</button>
-            
             <button class="cte-btn" style="margin-top: 10px; border-color: #666; color: #888;" onclick="window.CTEMap.closeTravelMenu()">取消</button>
         `);
     } else {
-        // ======================
-        // 普通模式 UI (原有)
-        // ======================
+        // 普通模式 UI (包含国家地图的“前往”逻辑)
         box.find('.travel-options').html(`
-            <!-- 新增: NPC 遇见选项 -->
             <div style="margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 10px;">
                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                     <span style="color:#aaa; font-size:13px;">是否遇见NPC？</span>
@@ -643,9 +609,11 @@ window.CTEMap.openTravelMenu = function(destination) {
     }
 
     box.css('display', 'flex');
+    // 修改标题，适应不同场景
+    $('#travel-title').text(`前往 ${destination}`);
 };
 
-// [新增] 最终执行行程指令 (包含人员、地点、NPC、行程内容)
+// 最终执行行程指令
 window.CTEMap.finalizeScheduleExecution = function() {
     const participants = window.CTEMap.tempScheduleParticipants.join(', ');
     const destination = window.CTEMap.currentDestination;
@@ -653,19 +621,16 @@ window.CTEMap.finalizeScheduleExecution = function() {
     
     let npcText = '';
     const npcInput = document.getElementById('npc-input');
-    // 注意：这里需要重新判断 toggleNPC 的状态
     if (npcInput && npcInput.style.display !== 'none') {
          const val = npcInput.value.trim();
          if (val) npcText = `，遇见了${val}`;
     }
 
-    // 构造指令文本
     const text = `${participants} 前往${destination}执行行程：${scheduleItem}${npcText}。`;
 
     if (stContext) {
         stContext.executeSlashCommandsWithOptions(`/setinput ${text}`);
         window.CTEMap.closeAllPopups();
-        // 执行完毕后，重置模式
         window.CTEMap.isSelectingForSchedule = false;
         window.CTEMap.tempScheduleParticipants = [];
     } else {
@@ -725,17 +690,14 @@ window.CTEMap.validateAndShowActivities = function() {
     const name = $('#companion-name').val();
     if (!name) return alert("请输入姓名");
     
-    // 暂存同伴姓名
     window.CTEMap.currentCompanion = name;
     
-    // 显示活动选择界面
     window.CTEMap.showActivityMenu();
 };
 
 window.CTEMap.showActivityMenu = function() {
     const activities = ['训练', '开会', '购物', '闲逛', '吃饭', '喝酒', '约会', '做爱', '运动', '直播', '拍摄节目', '接受媒体采访'];
     
-    // 生成活动按钮网格
     let buttonsHtml = activities.map(act => 
         `<button class="cte-btn" style="margin: 3px; min-width: 60px; font-size: 13px;" onclick="window.CTEMap.finalizeTravel('${act}')">${act}</button>`
     ).join('');
@@ -756,13 +718,9 @@ window.CTEMap.showActivityMenu = function() {
     `);
 };
 
-// [修改] 关闭 Travel Menu (支持防止重置状态)
 window.CTEMap.closeTravelMenu = function(shouldReset = true) {
     $('#travel-menu-overlay').hide();
     
-    // 默认情况下 (取消操作) 会重置模式
-    // 但如果只是为了切换UI (例如 closeAllPopups 清理画面但马上要显示其他内容)
-    // 我们可以传入 false 来防止重置
     if (shouldReset && window.CTEMap.isSelectingForSchedule) {
         window.CTEMap.isSelectingForSchedule = false;
         window.CTEMap.tempScheduleParticipants = [];
@@ -853,13 +811,11 @@ window.CTEMap.openThirdLevelMenu = function(roomName, floorTitle, floorItems) {
     titleEl.textContent = roomName;
     const desc = window.CTEMap.roomDetails[roomName] || "暂无详细介绍。";
     
-    // 检查是否为角色房间
     const profile = window.CTEMap.characterProfiles[roomName];
     
     let contentHTML = '';
     
     if (profile) {
-        // 特殊处理"你"的房间
         if (roomName === '你') {
             const savedAvatar = localStorage.getItem('cte_user_avatar');
             const avatarSrc = savedAvatar || '';
@@ -1096,30 +1052,22 @@ window.CTEMap.changeBackground = function(input) {
 window.CTEMap.showPopup = function(id) {
     if (id === 'dorm-detail-popup') window.CTEMap.closeAllPopups();
     
-    // 使用 querySelector 限制在 panel 内部查找，避免找到错误的元素
     const popup = document.querySelector(`#cte-map-panel #${id}`);
     const overlay = document.querySelector(`#cte-map-panel #cte-overlay`);
     
     if (popup) {
         if (overlay) overlay.style.display = 'block';
         popup.style.display = 'block';
-        // 修正：打开弹窗时，让弹窗内部回滚到顶部
         popup.scrollTop = 0;
     }
 };
 
-// [修改] 关闭所有弹窗
-// 优化：如果 Travel Menu 当前是可见的，我们才认为这是在重置模式
-// 如果只是关闭一个详情弹窗 (Travel Menu 不可见)，则不重置
 window.CTEMap.closeAllPopups = function() {
-    // 检测在关闭前，Travel Menu 是否是打开的
     const isTravelMenuVisible = $('#travel-menu-overlay').is(':visible');
     
     $('#cte-map-panel #cte-overlay').hide();
     $('#cte-map-panel .cte-popup').hide();
     window.CTEMap.closeSubMenu();
     
-    // 只有当 Travel Menu 可见时，调用 closeTravelMenu 才会触发状态重置
-    // (如果 isTravelMenuVisible 为 false, 则 shouldReset 为 false)
     window.CTEMap.closeTravelMenu(isTravelMenuVisible);
 };

@@ -649,25 +649,28 @@
 
 
 /* ========================================== */
-/* === [新增] 国家地图相关样式 === */
+/* === 国家地图相关样式 === */
 /* ========================================== */
 
 .national-map-container {
     position: relative;
     width: 100%;
     max-width: 700px;
-    aspect-ratio: 16/9;
+    /* [修改] 锁定为 1:1 画幅 */
+    aspect-ratio: 1 / 1; 
     background-color: #222;
     border: 1px solid #888;
     overflow: hidden;
     display: block; /* 覆盖 grid */
     margin-bottom: 20px;
     
-    /* [修改] 默认背景样式适配图片 */
+    /* 默认背景样式适配图片 */
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
     box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    /* 禁止默认触摸行为，方便拖拽 */
+    touch-action: none;
 }
 
 .national-city {
@@ -675,13 +678,22 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    cursor: pointer;
+    /* [修改] 鼠标样式改为 grab */
+    cursor: grab;
     transition: transform 0.3s ease, filter 0.3s ease;
     transform: translate(-50%, -50%);
+    user-select: none;
+    z-index: 50;
+    touch-action: none;
 }
 
+.national-city:active {
+    cursor: grabbing;
+}
+
+/* 移除 :hover 的 transform 放大，避免干扰拖拽体验 */
 .national-city:hover {
-    transform: translate(-50%, -50%) scale(1.1);
+    /* transform: translate(-50%, -50%) scale(1.1); */
     filter: drop-shadow(0 0 8px #d4b27a);
     z-index: 100;
 }
@@ -691,6 +703,7 @@
     color: #c0a062;
     text-shadow: 0 0 4px #c0a062;
     margin-bottom: 5px;
+    pointer-events: none; /* 防止图标干扰点击 */
 }
 
 .national-city .name {
@@ -700,6 +713,7 @@
     padding: 2px 6px;
     border-radius: 3px;
     white-space: nowrap;
+    pointer-events: none;
 }
 
 .national-info-panel {
@@ -865,7 +879,8 @@
     }
     
     /* 国家地图在手机上可能需要调整宽高比，防止太小 */
+    /* 由于要求锁定 1:1，这里保持 aspect-ratio: 1/1，让宽度自适应即可 */
     .national-map-container {
-        aspect-ratio: 4/3;
+        /* aspect-ratio: 4/3; */
     }
 }

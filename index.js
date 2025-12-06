@@ -1,3 +1,4 @@
+
 const extensionName = "CTE_Map";
 const extensionPath = `scripts/extensions/third-party/${extensionName}`;
 
@@ -101,38 +102,46 @@ window.CTEMap = Object.assign(window.CTEMap, {
 });
 
 // ==========================================
-// 2. 核心功能函数 (挂载到 window.CTEMap 确保可访问)
+// 2. 核心功能函数
 // ==========================================
 
 // 2.1 扫描 RPG 状态
 window.CTEMap.scanForRPGStats = function() {
     console.log("[CTE Manager] Scanning for stats...");
     if (window.CTEMap.RPG && window.CTEMap.RPG.state) {
-        $('#rpg-val-funds').text(window.CTEMap.RPG.state.funds.toLocaleString());
-        $('#rpg-val-fans').text(window.CTEMap.RPG.state.fans.toLocaleString());
-        $('#rpg-val-morale').text(window.CTEMap.RPG.state.morale);
+        // 使用原生 DOM 获取，防止 jQuery 在某些环境下获取到旧元素
+        const fundsEl = document.getElementById('rpg-val-funds');
+        const fansEl = document.getElementById('rpg-val-fans');
+        const moraleEl = document.getElementById('rpg-val-morale');
+
+        if (fundsEl) fundsEl.innerText = window.CTEMap.RPG.state.funds.toLocaleString();
+        if (fansEl) fansEl.innerText = window.CTEMap.RPG.state.fans.toLocaleString();
+        if (moraleEl) moraleEl.innerText = window.CTEMap.RPG.state.morale;
     }
 };
 
 // 2.2 渲染事务所内容
 window.CTEMap.renderRPGContent = function(viewType) {
-    const container = $('#cte-rpg-content-area');
-    if (!container.length) return; // 安全检查
+    const container = document.getElementById('cte-rpg-content-area');
+    if (!container) return;
 
-    container.empty();
+    container.innerHTML = '';
     
     if (viewType === 'roster') {
         let gridHtml = '<div class="cte-rpg-roster-grid">';
         for (const [name, profile] of Object.entries(window.CTEMap.characterProfiles)) {
             if (name === '你') continue;
             let warningHtml = '';
-            if (profile.status.desire > 80) {
+            if (profile.status && profile.status.desire > 80) {
                 warningHtml = `<div class="cte-rpg-warning-box"><span><i class="fa-solid fa-triangle-exclamation"></i> 欲望值过高</span><button class="cte-heartbeat-shortcut" onclick="window.CTEMap.switchView('heartbeat')"><i class="fa-solid fa-heart"></i></button></div>`;
             }
+            
+            const roleText = profile.role ? profile.role.split('、')[0] : '成员';
+            
             gridHtml += `
             <div class="cte-rpg-card">
                 <div style="display:flex; gap:15px;">
-                    <div class="cte-rpg-avatar-box"><img src="${profile.image}"><div class="cte-rpg-role-tag">${profile.role.split('、')[0]}</div></div>
+                    <div class="cte-rpg-avatar-box"><img src="${profile.image}"><div class="cte-rpg-role-tag">${roleText}</div></div>
                     <div style="flex:1;">
                         <div style="color:#fff; font-weight:bold; font-size:14px;">${name}</div>
                         <div style="font-size:10px; color:#888;">${profile.personality}</div>
@@ -146,38 +155,43 @@ window.CTEMap.renderRPGContent = function(viewType) {
             </div>`;
         }
         gridHtml += '</div>';
-        container.html(gridHtml);
+        container.innerHTML = gridHtml;
+
     } else if (viewType === 'agency') {
-        container.html('<div style="color:#888; text-align:center; padding:50px;">事务所运营功能正在开发中...<br>请先管理好现有艺人。</div>');
+        container.innerHTML = '<div style="color:#888; text-align:center; padding:50px;">事务所运营功能正在开发中...<br>请先管理好现有艺人。</div>';
     } else {
-        container.html(`
+        // Dashboard
+        container.innerHTML = `
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
                 <div class="cte-rpg-card">
-                    <h3 style="color:#fff; font-size:14px;">近期通告</h3>
+                    <h3 style="color:#fff; font-size:14px; margin-top:0;">近期通告</h3>
                     <ul style="list-style:none; padding:0; font-size:12px; color:#ccc;">
                         <li style="padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.1);">京港电视台专访 <span style="float:right; color:#c5a065;">完成</span></li>
                         <li style="padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.1);">新专辑《NEON》筹备 <span style="float:right; color:#888;">进行中</span></li>
+                        <li style="padding:5px 0; border-bottom:1px solid rgba(255,255,255,0.1);">练习生月度考核 <span style="float:right; color:#888;">下周</span></li>
                     </ul>
                 </div>
                 <div class="cte-rpg-card" style="display:flex; align-items:center; justify-content:center;">
                     <div style="text-align:center;">
-                        <div style="font-size:24px; color:#c5a065; font-weight:bold;">S+</div>
-                        <div style="font-size:10px; color:#666;">综合评价</div>
+                        <div style="font-size:32px; color:#c5a065; font-weight:bold;">S+</div>
+                        <div style="font-size:12px; color:#666;">综合评价</div>
                     </div>
                 </div>
             </div>
-        `);
+        `;
     }
 };
 
 // 2.3 渲染 Heartbeat 界面
 window.CTEMap.Heartbeat.renderGrid = function() {
-    const container = $('#cte-hb-activity-grid');
-    if (!container.length) return;
-    container.empty();
+    const container = document.getElementById('cte-hb-activity-grid');
+    if (!container) return;
     
+    container.innerHTML = '';
+    
+    let html = '';
     window.CTEMap.Heartbeat.activities.forEach(act => {
-        const card = `
+        html += `
             <div class="cte-hb-activity-card">
                 <div class="cte-hb-activity-icon"><i class="fa-solid ${act.icon}"></i></div>
                 <div class="cte-hb-activity-name">${act.name}</div>
@@ -185,26 +199,28 @@ window.CTEMap.Heartbeat.renderGrid = function() {
                 <button class="cte-hb-btn" onclick="window.CTEMap.Heartbeat.openModal('${act.name}')">安排互动</button>
             </div>
         `;
-        container.append(card);
     });
+    container.innerHTML = html;
 };
 
 window.CTEMap.Heartbeat.openModal = function(actName) {
     window.CTEMap.Heartbeat.currentActivity = actName;
-    const list = $('#cte-hb-member-list');
-    list.empty();
+    const list = document.getElementById('cte-hb-member-list');
+    if (!list) return;
+    
+    list.innerHTML = '';
+    let html = '';
     
     for (const [name, profile] of Object.entries(window.CTEMap.characterProfiles)) {
         if (name === '你') continue;
-        const item = `
+        html += `
             <div class="cte-hb-member-item" onclick="$(this).toggleClass('selected')">
                 <div class="cte-hb-member-avatar" style="background-image: url('${profile.image}')"></div>
                 <div class="cte-hb-member-name">${name}</div>
             </div>
         `;
-        list.append(item);
     }
-    
+    list.innerHTML = html;
     $('#cte-hb-modal').addClass('active');
 };
 
@@ -234,7 +250,7 @@ window.CTEMap.Heartbeat.confirmAssignment = function() {
     }
 };
 
-// 2.4 视图切换 (修复作用域引用)
+// 2.4 视图切换
 window.CTEMap.switchView = function(viewName, btn) {
     console.log("[CTE Map] Switching to view:", viewName);
     $('.cte-nav-btn').removeClass('active');
@@ -246,7 +262,10 @@ window.CTEMap.switchView = function(viewName, btn) {
     }
 
     $('.cte-view').removeClass('active');
-    $(`#cte-view-${viewName}`).addClass('active');
+    
+    // 使用 document.getElementById 获取视图
+    const targetView = document.getElementById(`cte-view-${viewName}`);
+    if (targetView) targetView.classList.add('active');
 
     // 调用对应渲染逻辑
     try {
@@ -255,6 +274,7 @@ window.CTEMap.switchView = function(viewName, btn) {
         }
         if (viewName === 'manager') {
             window.CTEMap.scanForRPGStats();
+            // 默认显示 dashboard
             window.CTEMap.renderRPGContent('dashboard'); 
         }
         if (viewName === 'heartbeat') {
@@ -287,9 +307,6 @@ function bindRPGEvents() {
     });
 }
 
-/**
- * 动态计算并设置面板位置
- */
 function fixPanelPosition() {
     const panel = document.getElementById('cte-map-panel');
     if (!panel) return;
@@ -333,26 +350,18 @@ function setupResizeListener() {
 async function initializeExtension() {
     console.log("[CTE Map] Initializing...");
 
-    $('#cte-map-panel').remove();
-    $('#cte-toggle-btn').remove();
-    $('link[href*="CTE_Map/style.css"]').remove();
+    // 使用原生 API 彻底清除可能存在的旧元素
+    document.querySelectorAll('#cte-map-panel').forEach(el => el.remove());
+    document.querySelectorAll('#cte-toggle-btn').forEach(el => el.remove());
     
-    // [修复] 不移除 FontAwesome，防止幽灵图标显形
-    // $('link[href*="font-awesome"]').remove(); 
+    // 移除旧样式防止冲突
+    document.querySelectorAll('link[href*="CTE_Map/style.css"]').forEach(el => el.remove());
 
-    // 添加时间戳防止缓存
     const timestamp = Date.now();
-
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = `${extensionPath}/style.css?v=${timestamp}`;
     document.head.appendChild(link);
-
-    // [修复] 不注入新的 FontAwesome CDN，直接使用酒馆自带的，避免版本冲突
-    // const faLink = document.createElement('link');
-    // faLink.rel = 'stylesheet';
-    // faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css';
-    // document.head.appendChild(faLink);
 
     const panelHTML = `
         <div id="cte-toggle-btn" title="点击打开 / 长按拖动" 
@@ -379,7 +388,9 @@ async function initializeExtension() {
         const response = await fetch(`${extensionPath}/map.html?v=${timestamp}`);
         if (!response.ok) throw new Error("Map file not found");
         const htmlContent = await response.text();
-        $('#cte-content-area').html(htmlContent);
+        
+        // 注入 HTML
+        document.getElementById('cte-content-area').innerHTML = htmlContent;
         
         bindMapEvents();
         loadSavedPositions();
@@ -391,7 +402,7 @@ async function initializeExtension() {
 
     } catch (e) {
         console.error("[CTE Map] Error:", e);
-        $('#cte-content-area').html(`<p style="padding:20px; color:white;">无法加载地图文件 (map.html)。<br>请检查控制台获取详细错误。</p>`);
+        document.getElementById('cte-content-area').innerHTML = `<p style="padding:20px; color:white;">无法加载地图文件 (map.html)。<br>请检查控制台获取详细错误。</p>`;
     }
 
     let isIconDragging = false;

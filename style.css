@@ -1,237 +1,771 @@
-<!-- 视图切换容器 -->
-<div id="cte-view-map" class="cte-view active">
-    <div class="cte-wrapper">
-        <h1>京港市地图 - 档案模式</h1>
-        <h2>双击标签查看详情，长按拖拽标签移动</h2>
+/* ==========================================
+   THEME VARIABLES & RESET
+   ========================================== */
+:root {
+    --bg-body: #d4d4d4;         /* Outer Background */
+    --bg-card: #f9f9f7;         /* Paper Background */
+    --text-primary: #1a1a1a;    /* Ink Black */
+    --text-secondary: #555555;  /* Grey Text */
+    --text-muted: #888888;      /* Muted Text */
+    --accent-red: #a84444;      /* Stamp Red */
+    --alert-bg: #eee4e4;
+    --line-color: #e0e0e0;
+    --font-serif: 'Noto Serif SC', 'Playfair Display', serif;
+    --font-sans: 'Inter', sans-serif;
+}
 
-        <div class="controls-bar">
-            <!-- [原有功能保持] -->
-            <button class="cte-btn" onclick="window.CTEMap.switchView('national-map')">🗺️ 前往国家地图</button>
-            <span style="border-right: 1px solid #444; margin: 0 10px; height: 15px;"></span>
-            <span>更换背景：</span>
-            <button class="cte-btn" onclick="document.getElementById('bg-upload').click()">📂 选择图片...</button>
-            <input type="file" id="bg-upload" accept="image/*" style="display:none;" onchange="window.CTEMap.changeBackground(this)">
-            <span style="margin-left:auto; font-size: 12px; color: #888;">提示：坐标位置会自动保存</span>
-        </div>
+/* Override any default styles */
+#cte-map-panel * {
+    box-sizing: border-box;
+}
 
-        <div class="map-container" id="cte-map-container">
-            <div class="location" id="gov" style="top: 60%; left: 50%;" data-popup="gov-popup"><span class="label">京港市政府</span></div>
-            <div class="location" id="villa" style="top: 15%; left: 25%;" data-popup="villa-popup"><span class="label">私人别墅</span></div>
-            <div class="location" id="dorm" style="top: 15%; left: 50%;" data-popup="dorm-popup"><span class="label">CTE宿舍</span></div>
-            <div class="location" id="PrivateClub" style="top: 15%; left: 75%;" data-popup="PrivateClub-popup"><span class="label">私人会所</span></div>
-            <div class="location" id="airport" style="top: 35%; left: 85%;" data-popup="airport-popup"><span class="label">机场</span></div>
-            <div class="location" id="port" style="top: 65%; left: 85%;" data-popup="port-popup"><span class="label">港口</span></div>
-            <div class="location" id="office4" style="top: 25%; left: 15%;" data-popup="office4-popup"><span class="label">隆桑集团</span></div>
-            <div class="location" id="office3" style="top: 35%; left: 10%;" data-popup="office3-popup"><span class="label">盛华集团</span></div>
-            <div class="location" id="office" style="top: 60%; left: 15%;" data-popup="office-popup"><span class="label">远洋集团</span></div>
-            <div class="location" id="TVstation" style="top: 65%; left: 20%;" data-popup="TVstation-popup"><span class="label">京港电视台</span></div>
-            <div class="location" id="office2" style="top: 70%; left: 15%;" data-popup="office2-popup"><span class="label">万城娱乐</span></div>
-            <div class="location" id="highschool" style="top: 85%; left: 30%;" data-popup="highschool-popup"><span class="label">京港第三高中</span></div>
-            <div class="location" id="other-places" style="top: 85%; left: 85%;" data-popup="other-places-popup"><span class="label">其他地点</span></div>
-        </div>
-    </div>
-</div>
-
-<!-- [原有] 国家地图视图 -->
-<div id="cte-view-national-map" class="cte-view">
-    <div class="cte-wrapper" style="width: 95%;">
-        <h1>权贵之心：国家战略地图</h1>
-        <p style="font-family: 'Zhi Mang Xing', cursive; color: #a0a0a0; margin-top: 0px; letter-spacing: 1px; font-size: 14px;">一张错综复杂的权力地图，一场没有硝烟的资本战争</p>
-        
-        <div class="controls-bar" style="justify-content: center;">
-             <button class="cte-btn" onclick="window.CTEMap.switchView('map')">↩️ 返回京港市</button>
-        </div>
-
-        <!-- 国家地图容器 -->
-        <div class="national-map-container" id="national-game-map">
-            <!-- 城市将由 JS 注入 -->
-        </div>
-
-        <div class="national-info-panel">
-            <div id="national-info-content">
-                <h2><i class="fa-solid fa-map-location-dot"></i> 战略情报中心</h2>
-                <p>请点击地图上的城市图标以获取详细情报...</p>
-                <p style="font-size: 12px; color: #888; margin-top: 10px;">提示：点击“京港”图标可直接返回市内地图。</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- [原有] 行程表视图 -->
-<div id="cte-view-schedule" class="cte-view">
-    <div class="cte-wrapper">
-        <h1>当前行程安排</h1>
-        <h2 id="cte-schedule-status">正在读取最新状态...</h2>
-        
-        <div class="controls-bar">
-            <button class="cte-btn" onclick="window.CTEMap.refreshSchedule()">🔄 刷新行程 (读取 status_top)</button>
-        </div>
-
-        <div id="cte-timeline-container" class="cte-timeline-container">
-            <!-- 动态生成的时间轴内容 -->
-            <p style="text-align:center; color:#666; margin-top:50px;">暂无行程数据，请确保聊天记录中包含 &lt;status_top&gt; 标签。</p>
-        </div>
-    </div>
-</div>
-
-<!-- [新增] 偶像事务所 RPG 管理终端视图 -->
-<div id="cte-view-manager" class="cte-view" style="background-color: #0d0d0d;">
-    <div class="cte-rpg-container">
-        <!-- 侧边栏 -->
-        <div class="cte-rpg-sidebar">
-            <div class="cte-rpg-logo"><span>M</span></div>
-            <button class="cte-rpg-nav-btn active" data-subview="dashboard" title="概览"><i class="fa-solid fa-chart-pie"></i></button>
-            <button class="cte-rpg-nav-btn" data-subview="roster" title="艺人阵容"><i class="fa-solid fa-users"></i></button>
-            <button class="cte-rpg-nav-btn" data-subview="agency" title="事务所运营"><i class="fa-solid fa-building"></i></button>
-        </div>
-        
-        <!-- 主内容区 -->
-        <div class="cte-rpg-main">
-            <!-- 顶部 HUD -->
-            <div class="cte-rpg-hud">
-                <div style="font-family:'Cinzel',serif; font-weight:bold; color:var(--cte-accent-gold); letter-spacing:2px;">IDOL OS v2.4</div>
-                <div class="cte-rpg-res-group">
-                    <div class="cte-rpg-res-item">
-                        <div class="cte-rpg-res-icon" style="color:#DDB753"><i class="fa-solid fa-coins"></i></div>
-                        <div><span class="cte-rpg-res-val" id="rpg-val-funds">Loading...</span><span class="cte-rpg-res-label">预算</span></div>
-                    </div>
-                    <div class="cte-rpg-res-item">
-                        <div class="cte-rpg-res-icon" style="color:#F472B6"><i class="fa-solid fa-heart"></i></div>
-                        <div><span class="cte-rpg-res-val" id="rpg-val-fans">Loading...</span><span class="cte-rpg-res-label">粉丝数</span></div>
-                    </div>
-                    <div class="cte-rpg-res-item">
-                        <div class="cte-rpg-res-icon" style="color:#60A5FA"><i class="fa-solid fa-fire"></i></div>
-                        <div><span class="cte-rpg-res-val" id="rpg-val-morale">High</span><span class="cte-rpg-res-label">团魂</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- RPG 子视图内容容器 -->
-            <div id="cte-rpg-content-area" style="flex:1; padding: 20px; overflow-y: auto;">
-                <!-- 动态注入 RPG 内容 -->
-                <div style="color: #666;">正在连接 SillyTavern 神经接口...</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- [新增] Heartbeat 亲密互动视图 -->
-<div id="cte-view-heartbeat" class="cte-view" style="background-color: #FFF0F5;">
-    <div class="cte-hb-container">
-        <div class="cte-hb-header">
-            <h1><i class="fa-solid fa-heart"></i> Special Interactions <i class="fa-solid fa-heart"></i></h1>
-            <p style="color: white; font-size: 12px; margin:0;">与成员进行深度互动的私密空间</p>
-        </div>
-        <div class="cte-hb-content">
-            <div class="cte-hb-grid" id="cte-hb-activity-grid">
-                <!-- JS Generated Activities -->
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- 遮罩层 (保持不变) -->
-<div class="popup-overlay" id="cte-overlay" onclick="window.CTEMap.closeAllPopups()"></div>
-
-<!-- 出行菜单 (保持不变 - DOM注入逻辑在JS中) -->
-<div id="travel-menu-overlay" onclick="if(event.target === this) window.CTEMap.closeTravelMenu()">
-    <div class="travel-menu-box">
-        <span class="close-btn" onclick="window.CTEMap.closeTravelMenu()">&times;</span>
-        <div id="travel-title" style="color:#e0c5a1; margin-bottom:20px;">前往目的地</div>
-        <div id="travel-content" class="travel-options"></div>
-    </div>
-</div>
-
-<!-- 参与者选择弹窗 (原有) -->
-<div id="cte-participant-popup" class="cte-popup" style="max-width: 400px;">
-    <span class="close-btn" onclick="window.CTEMap.closeAllPopups()">&times;</span>
-    <h3>👥 选择参与人员</h3>
-    <p style="font-size:12px; color:#888; margin-bottom:10px;">请勾选参与此行程的成员：</p>
+/* ==========================================
+   MAIN PANEL CONTAINER (Archive Card)
+   ========================================== */
+#cte-map-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     
-    <div id="cte-participant-list" class="participant-grid">
-        <!-- JS 动态生成复选框 -->
-    </div>
+    width: 760px;
+    height: 85vh;
+    max-height: 900px;
     
-    <div style="margin-top:15px; border-top:1px solid #444; padding-top:10px;">
-        <p style="font-size:12px; color:#aaa; margin-bottom:5px;">其他人员 (选填):</p>
-        <input type="text" id="participant-custom" class="travel-input" placeholder="输入其他名字..." style="width:90%;">
-    </div>
+    background: var(--bg-card) !important; /* Force override dark mode */
+    border: none !important;
+    border-radius: 4px;
+    
+    /* Paper shadow effect */
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15), 0 5px 10px rgba(0,0,0,0.05) !important;
+    
+    z-index: 20000;
+    display: none;
+    overflow: hidden; 
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+    padding: 0;
+}
 
-    <div style="text-align:center; margin-top:15px; display:flex; gap:10px; justify-content:center;">
-        <button class="cte-btn" onclick="window.CTEMap.proceedToLocationSelection()" style="background:#b38b59; color:#1a1a1a;">📍 选择地点</button>
-        <button class="cte-btn" onclick="window.CTEMap.closeAllPopups()" style="border-color:#666; color:#888;">取消</button>
-    </div>
-</div>
+/* ==========================================
+   HEADER & NAVIGATION
+   ========================================== */
+#cte-drag-handle {
+    width: 100%;
+    height: 50px;
+    background: transparent !important; /* Remove dark bg */
+    border-bottom: 2px solid var(--text-primary) !important;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    cursor: move;
+    color: var(--text-primary) !important;
+}
 
-<!-- [新增] Heartbeat 专属多选弹窗 -->
-<div id="cte-hb-modal" class="cte-hb-modal">
-    <div class="cte-hb-modal-content">
-        <h2 id="cte-hb-modal-title" style="margin: 0 0 10px 0;">分配成员</h2>
-        <p style="color: #666; font-size: 0.9rem;">请选择要参与互动的偶像（可多选）</p>
-        <div class="cte-hb-member-list" id="cte-hb-member-list">
-            <!-- JS Generated Members -->
-        </div>
-        <div style="margin-top: 15px; display: flex; justify-content: center; gap: 10px;">
-            <button class="cte-hb-assign-button" id="cte-hb-confirm-btn" onclick="window.CTEMap.Heartbeat.confirmAssignment()">确认安排</button>
-            <button class="cte-hb-close-button" onclick="window.CTEMap.Heartbeat.closeModal()">取消</button>
-        </div>
-    </div>
-</div>
+/* Title text in drag handle */
+#cte-drag-handle span:first-child {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
 
-<!-- 自定义地点弹窗 (原有) -->
-<div id="other-places-popup" class="cte-popup">
-    <span class="close-btn" onclick="window.CTEMap.closeAllPopups()">&times;</span>
-    <h3>🗺️ 自定义目的地</h3>
-    <p>请输入您想前往的任意地点：</p>
-    <div style="text-align: center;">
-        <input type="text" id="custom-destination-input" class="travel-input" style="width: 90%; margin-top:10px;" placeholder="例如：海边">
-        <button class="cte-btn" onclick="window.CTEMap.goToCustomDestination()">🚀 前往</button>
-    </div>
-</div>
+/* Navigation Buttons */
+.cte-nav-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    transition: all 0.2s;
+    border-radius: 2px;
+}
 
-<!-- 宿舍弹窗 (原有) -->
-<div id="dorm-popup" class="cte-popup">
-    <span class="close-btn" onclick="window.CTEMap.closeAllPopups()">&times;</span>
-    <h3>🏠 CTE男团宿舍</h3>
-    <p>坐落在北区别墅区中的CTE男团宿舍，安保和私密性都是顶级。</p>
-    <img src="https://files.catbox.moe/qn281x.JPG" class="popup-image">
-    <div style="text-align: center;">
-        <button class="cte-btn" onclick="window.CTEMap.showPopup('dorm-detail-popup')">🚪 宿舍内部</button>
-        <button class="cte-btn" onclick="window.CTEMap.openTravelMenu('CTE男团宿舍')">🚀 前往</button>
-    </div>
-</div>
+.cte-nav-btn.active {
+    color: var(--bg-card);
+    background-color: var(--accent-red);
+    border-bottom: none !important;
+}
 
-<!-- 宿舍详情 (原有) -->
-<div id="dorm-detail-popup" class="cte-popup">
-    <span class="close-btn" onclick="window.CTEMap.closeAllPopups()">&times;</span>
-    <h3>🛋️ 宿舍内部</h3>
-    <div class="interior-container">
-        <img src="https://files.catbox.moe/40ygiw.JPG" class="interior-image">
-        <div class="floor-nav">
-            <button class="floor-btn" onclick="window.CTEMap.openRooftopMenu()">1. 屋顶：天台花园酒吧</button>
-            <button class="floor-btn" onclick="window.CTEMap.openSubMenu('五楼：私人宿舍区', ['秦述', '司洛', '鹿言', '魏星泽', '周锦宁', '谌绪', '孟明赫', '亓谢', '魏月华', '桑洛凡', '你', '公共书房/阅览区'])">2. 五楼：私人宿舍区</button>
-            <button class="floor-btn" onclick="window.CTEMap.openSubMenu('四楼：健康与恢复区', ['健身房', '瑜伽与冥想室', '水疗与按摩室', '健康管理室'])">3. 四楼：健康与恢复区</button>
-            <button class="floor-btn" onclick="window.CTEMap.openSubMenu('三楼：专业练习区', ['主舞蹈室', '声乐录音棚', '造型与衣帽间', '成员休息室', '会议室'])">4. 三楼：专业练习区</button>
-            <button class="floor-btn" onclick="window.CTEMap.openSubMenu('二楼：个人创作与娱乐区', ['周锦宁个人工作室', '孟明赫个人工作室', '乐器练习室', '游戏娱乐室', '私人会客厅', '收藏室'])">5. 二楼：个人创作与娱乐区</button>
-            <button class="floor-btn" onclick="window.CTEMap.openSubMenu('一楼：生活与休闲区', ['前院与玄关', '客厅/公共休息区', '开放式厨房与餐厅', '储藏室与洗衣房', '后院与露天泳池'])">6. 一楼：生活与休闲区</button>
-        </div>
-        <div id="interior-sub-menu" class="sub-menu-overlay">
-            <div id="sub-menu-title" style="color:#b38b59; font-size:20px; margin-bottom:20px;"></div>
-            <div id="sub-menu-content" class="sub-menu-grid"></div>
-            <div class="sub-menu-close" style="margin-top:20px; cursor:pointer;" onclick="window.CTEMap.closeSubMenu()">[ 关闭菜单 ]</div>
-        </div>
-    </div>
-</div>
+.cte-nav-btn:hover:not(.active) {
+    color: var(--accent-red);
+}
 
-<!-- 其他地点 (原有) -->
-<div id="office-popup" class="cte-popup"><span class="close-btn" onclick="window.CTEMap.closeAllPopups()">&times;</span><h3>🏢 远洋集团</h3><p>主营航运、大宗商品与投资的家族企业。</p><div style="text-align:center"><button class="cte-btn" onclick="window.CTEMap.openTravelMenu('远洋集团')">🚀 前往</button></div></div>
-<div id="villa-popup" class="cte-popup"><span class="close-btn" onclick="window.CTEMap.closeAllPopups()">&times;</span><h3>🏰 私人别墅</h3><p>你自己位于京港北区的一栋独栋别墅。</p><div style="text-align:center"><button class="cte-btn" onclick="window.CTEMap.openTravelMenu('私人别墅')">🚀 前往</button></div></div>
-<div id="office2-popup" class="cte-popup"><span class="close-btn" onclick="window.CTEMap.closeAllPopups()">&times;</span><h3>☕ 万城娱乐</h3><p>国内最大的娱乐产业集团之一。</p><div style="text-align:center"><button class="cte-btn" onclick="window.CTEMap.openTravelMenu('万城娱乐')">🚀 前往</button></div></div>
-<div id="office3-popup" class="cte-popup"><span class="close-btn" onclick="window.CTEMap.closeAllPopups()">&times;</span><h3>🏢 盛华集团</h3><p>老牌实业集团，在本地拥有深厚根基。</p><div style="text-align:center"><button class="cte-btn" onclick="window.CTEMap.openTravelMenu('盛华集团')">🚀 前往</button></div></div>
-<div id="office4-popup" class="cte-popup"><span class="close-btn" onclick="window.CTEMap.closeAllPopups()">&times;</span><h3>🏢 隆桑集团</h3><p>京港市的新兴科技巨头。</p><div style="text-align:center"><button class="cte-btn" onclick="window.CTEMap.openTravelMenu('隆桑集团')">🚀 前往</button></div></div>
-<div id="highschool-popup" class="cte-popup"><span class="close-btn" onclick="window.CTEMap.closeAllPopups()">&times;</span><h3>🏫 京港第三高中</h3><p>京港市著名的重点高中。</p><div style="text-align:center"><button class="cte-btn" onclick="window.CTEMap.openTravelMenu('京港第三高中')">🚀 前往</button></div></div>
-<div id="gov-popup" class="cte-popup"><span class="close-btn" onclick="window.CTEMap.closeAllPopups()">&times;</span><h3>🏛️ 京港市政府</h3><p>城市行政中心。</p><div style="text-align:center"><button class="cte-btn" onclick="window.CTEMap.openTravelMenu('京港市政府')">🚀 前往</button></div></div>
-<div id="PrivateClub-popup" class="cte-popup"><span class="close-btn" onclick="window.CTEMap.closeAllPopups()">&times;</span><h3>🍷 私人会所</h3><p>仅限会员进入的高级会所，隐秘性极高。</p><div style="text-align:center"><button class="cte-btn" onclick="window.CTEMap.openTravelMenu('私人会所')">🚀 前往</button></div></div>
-<div id="TVstation-popup" class="cte-popup"><span class="close-btn" onclick="window.CTEMap.closeAllPopups()">&times;</span><h3>📺 京港电视台</h3><p>城市媒体中心，众多节目的录制现场。</p><div style="text-align:center"><button class="cte-btn" onclick="window.CTEMap.openTravelMenu('京港电视台')">🚀 前往</button></div></div>
-<div id="airport-popup" class="cte-popup"><span class="close-btn" onclick="window.CTEMap.closeAllPopups()">&times;</span><h3>✈️ 机场</h3><p>连接京港与世界的交通枢纽。</p><div style="text-align:center"><button class="cte-btn" onclick="window.CTEMap.openTravelMenu('机场')">🚀 前往</button></div></div>
-<div id="port-popup" class="cte-popup"><span class="close-btn" onclick="window.CTEMap.closeAllPopups()">&times;</span><h3>⚓ 港口</h3><p>繁忙的国际货运港口。</p><div style="text-align:center"><button class="cte-btn" onclick="window.CTEMap.openTravelMenu('港口')">🚀 前往</button></div></div>
+/* Close Button */
+#cte-close-btn {
+    font-family: var(--font-sans);
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+#cte-close-btn:hover { opacity: 1; }
+
+/* Content Area */
+#cte-content-area {
+    height: calc(100% - 50px);
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    background-color: var(--bg-card) !important;
+}
+
+/* ==========================================
+   VIEW CONTAINERS & TYPOGRAPHY
+   ========================================== */
+.cte-view {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding: 20px 30px;
+    display: none;
+    background: var(--bg-card) !important;
+}
+
+.cte-view.active { display: block; }
+
+/* Scrollbar Styling */
+.cte-view::-webkit-scrollbar { width: 6px; }
+.cte-view::-webkit-scrollbar-track { background: transparent; }
+.cte-view::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
+/* Archive Header Style (H1 replacement) */
+.archive-header {
+    margin-bottom: 20px;
+}
+
+.header-date {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+    border-bottom: 4px solid var(--text-primary);
+    padding-bottom: 8px;
+}
+
+.cte-wrapper h1 {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 28px;
+    color: var(--text-primary);
+    margin: 0;
+    letter-spacing: -0.5px;
+    line-height: 1;
+}
+
+.time-badge {
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: #eadddd;
+    padding: 2px 8px;
+    border-radius: 2px;
+}
+
+.meta-block {
+    font-size: 11px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.meta-primary {
+    font-family: var(--font-serif);
+    font-weight: 700;
+}
+.meta-secondary { text-transform: uppercase; letter-spacing: 0.5px; }
+.divider-v { color: #ccc; }
+
+/* Controls Bar */
+.controls-bar {
+    background: #fff;
+    border: 1px solid var(--line-color);
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 2px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    color: var(--text-secondary);
+}
+
+.cte-btn {
+    border: 1px solid var(--text-primary);
+    color: var(--text-primary);
+    background-color: transparent;
+    padding: 5px 12px;
+    border-radius: 2px;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    transition: all 0.2s;
+}
+
+.cte-btn:hover {
+    background-color: var(--text-primary);
+    color: var(--bg-card);
+}
+
+.cte-btn.primary {
+    background-color: var(--accent-red);
+    border-color: var(--accent-red);
+    color: white;
+}
+.cte-btn.primary:hover {
+    background-color: #8a3636;
+}
+
+/* ==========================================
+   MAP VIEW
+   ========================================== */
+.map-frame {
+    padding: 10px;
+    background: #fff;
+    border: 1px solid var(--line-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+    width: 100%;
+    max-width: 700px;
+}
+
+.map-container, .national-map-container {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background-color: #e0e0e0;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--text-primary);
+}
+
+.location {
+    position: absolute;
+    cursor: grab;
+    background-color: #fff !important;
+    border: 2px solid var(--accent-red) !important;
+    padding: 4px 10px;
+    border-radius: 12px;
+    color: var(--text-primary) !important;
+    font-family: var(--font-sans);
+    font-size: 11px;
+    font-weight: 700;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transform: translate(-50%, -50%);
+    transition: transform 0.2s;
+    z-index: 10;
+}
+
+.location:hover {
+    z-index: 20;
+    background-color: var(--accent-red) !important;
+    color: white !important;
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.location.dragging { opacity: 0.8; cursor: grabbing; }
+
+/* National Map Cities */
+.national-city {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: grab;
+    transform: translate(-50%, -50%);
+}
+
+.national-city i {
+    font-size: 20px;
+    color: var(--accent-red);
+    background: #fff;
+    border-radius: 50%;
+    padding: 5px;
+    border: 1px solid var(--text-primary);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.national-city .name {
+    margin-top: 4px;
+    background: #fff;
+    border: 1px solid var(--text-primary);
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-primary);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.brief-box {
+    background-color: #f0f0ed;
+    padding: 15px;
+    border-left: 3px solid var(--accent-red);
+    margin-top: 20px;
+    color: var(--text-primary);
+}
+.brief-box h2 {
+    font-family: var(--font-serif);
+    font-size: 16px;
+    margin-top: 0;
+    color: var(--accent-red);
+}
+
+/* ==========================================
+   SCHEDULE / TIMELINE (Dossier List)
+   ========================================== */
+.section-divider {
+    border-top: 1px solid var(--line-color);
+    margin: 20px 0 15px 0;
+    position: relative;
+    width: 100%;
+}
+
+.section-label {
+    position: absolute;
+    top: -8px;
+    background-color: var(--bg-card);
+    padding-right: 10px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.dossier-list {
+    width: 100%;
+    max-width: 700px;
+}
+
+/* Retargeting existing JS classes to new style */
+.cte-timeline-item {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--line-color);
+    margin-bottom: 0;
+    position: relative;
+}
+
+.cte-timeline-item::before { display: none; /* Remove old vertical line */ }
+
+.cte-timeline-time {
+    position: static;
+    font-family: var(--font-sans);
+    font-size: 10px;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    text-align: left;
+    margin-bottom: 4px;
+    width: auto;
+}
+
+.cte-timeline-time::before {
+    content: "\f017"; /* Clock icon */
+    font-family: "Font Awesome 6 Free";
+    font-weight: 400;
+    margin-right: 4px;
+}
+
+.cte-timeline-content {
+    background: transparent;
+    border: none;
+    border-left: none;
+    padding: 0;
+    width: 100%;
+}
+
+.cte-timeline-content:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.cte-schedule-title {
+    font-family: var(--font-serif);
+    font-size: 14px;
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.cte-tag {
+    background-color: transparent;
+    border: 1px solid var(--text-primary);
+    color: var(--text-primary);
+    font-size: 9px;
+    padding: 1px 4px;
+    border-radius: 2px;
+    text-transform: uppercase;
+}
+
+.cte-exec-btn {
+    background: transparent;
+    border: 1px solid var(--line-color);
+    color: var(--text-secondary);
+    margin-top: 8px;
+    padding: 4px;
+    border-radius: 2px;
+    font-size: 10px;
+    width: auto;
+    display: inline-block;
+}
+.cte-exec-btn:hover {
+    background: var(--text-primary);
+    color: white;
+}
+
+/* ==========================================
+   RPG MANAGER (Financial Report)
+   ========================================== */
+.cte-rpg-container {
+    background: var(--bg-card) !important;
+    display: flex;
+    height: 100%;
+    color: var(--text-primary);
+}
+
+.cte-rpg-sidebar {
+    background: #f0f0ed;
+    border-right: 1px solid var(--line-color);
+    width: 50px;
+    padding-top: 20px;
+}
+
+.cte-rpg-logo {
+    border: 1px solid var(--text-primary);
+    color: var(--text-primary);
+    width: 32px; height: 32px;
+    margin-bottom: 30px;
+    box-shadow: none;
+    background: white;
+}
+
+.cte-rpg-logo span { color: var(--text-primary); }
+
+.cte-rpg-nav-btn {
+    color: var(--text-muted);
+}
+.cte-rpg-nav-btn.active, .cte-rpg-nav-btn:hover {
+    color: var(--accent-red);
+    background: rgba(0,0,0,0.05);
+}
+
+.cte-rpg-main { background: var(--bg-card); }
+
+/* HUD Styling */
+.cte-rpg-hud {
+    background: #fff;
+    border-bottom: 2px solid var(--text-primary);
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    color: var(--text-primary);
+}
+
+.hud-title {
+    font-family: var(--font-serif);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 1px;
+}
+
+.cte-rpg-res-group { gap: 30px; }
+
+.cte-rpg-res-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.cte-rpg-res-icon { display: none; /* Hide icons in header for cleaner look */ }
+
+.cte-rpg-res-label {
+    font-size: 9px;
+    color: var(--text-muted);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.cte-rpg-res-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+/* Cards (Personnel Files) */
+.cte-rpg-card {
+    background: #fff;
+    border: 1px solid var(--line-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    padding: 15px;
+    color: var(--text-primary);
+}
+
+.cte-rpg-card:hover {
+    border-color: var(--accent-red);
+    background: #fff;
+}
+
+.cte-rpg-avatar-box {
+    border: 1px solid var(--line-color);
+    width: 60px; height: 60px;
+}
+
+.cte-rpg-role-tag {
+    background: var(--text-primary);
+    color: white;
+    border: none;
+    font-family: var(--font-sans);
+}
+
+/* Stat Bars Override */
+.cte-rpg-stat-bar-container .bar-bg {
+    background: #eee;
+    height: 4px;
+}
+
+/* JS injects inline colors. We use !important or attribute selectors to override */
+.cte-rpg-stat-bar-container .bar-fill {
+    box-shadow: none !important;
+}
+
+/* Gold becomes Black */
+div[style*="background:#c5a065"], div[style*="background: rgb(197, 160, 101)"] {
+    background-color: var(--text-primary) !important;
+}
+/* Pink becomes Red */
+div[style*="background:#ec4899"], div[style*="background: rgb(236, 72, 153)"] {
+    background-color: var(--accent-red) !important;
+}
+span[style*="color:#ec4899"], span[style*="color: rgb(236, 72, 153)"] {
+    color: var(--accent-red) !important;
+}
+span[style*="color:#f43f5e"] { color: var(--accent-red) !important; }
+div[style*="background:#f43f5e"] { background-color: var(--accent-red) !important; }
+
+/* Dashboard List */
+.cte-rpg-card ul li {
+    border-bottom: 1px dashed var(--line-color) !important;
+    color: var(--text-secondary) !important;
+}
+
+/* ==========================================
+   HEARTBEAT VIEW (Confidential Log)
+   ========================================== */
+#cte-view-heartbeat {
+    background-color: var(--bg-card) !important;
+}
+
+.cte-hb-container {
+    background-color: transparent;
+    color: var(--text-primary);
+}
+
+.cte-hb-header {
+    background: transparent;
+    border-bottom: 2px solid var(--accent-red);
+    padding: 10px 0 20px 0;
+    text-align: left;
+}
+
+.cte-hb-header h1 {
+    color: var(--text-primary);
+    font-size: 24px;
+    text-shadow: none;
+}
+
+.cte-hb-activity-card {
+    background: #fff;
+    border: 1px solid var(--line-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    border-radius: 2px;
+    padding: 20px;
+}
+
+.cte-hb-activity-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-color: var(--accent-red);
+}
+
+.cte-hb-activity-icon {
+    color: var(--accent-red);
+    font-size: 1.5rem;
+}
+
+.cte-hb-activity-name {
+    font-family: var(--font-serif);
+    color: var(--text-primary);
+    font-size: 16px;
+}
+
+.cte-hb-activity-desc {
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+}
+
+.cte-hb-btn {
+    background-color: white;
+    color: var(--text-primary);
+    border: 1px solid var(--text-primary);
+    border-radius: 2px;
+    padding: 4px 12px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.cte-hb-btn:hover {
+    background-color: var(--accent-red);
+    border-color: var(--accent-red);
+    color: white;
+}
+
+/* ==========================================
+   POPUPS (Sticky Notes / Index Cards)
+   ========================================== */
+.paper-popup {
+    background-color: #fff !important;
+    border: 1px solid #ccc !important;
+    border-top: 4px solid var(--accent-red) !important; /* Red top border like index card */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important;
+    color: var(--text-primary) !important;
+    border-radius: 2px;
+}
+
+.popup-header h3 {
+    font-family: var(--font-serif);
+    color: var(--text-primary) !important;
+    border-bottom: 1px solid var(--line-color) !important;
+    padding-bottom: 10px;
+    margin-top: 0;
+}
+
+.popup-desc, .popup-instruction {
+    color: var(--text-secondary) !important;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.popup-image, .interior-image {
+    border: 1px solid var(--line-color) !important;
+    padding: 4px;
+    background: #fff;
+}
+
+.popup-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid var(--line-color);
+    padding-top: 15px;
+}
+
+/* Interior Menu */
+.sub-menu-overlay {
+    background: rgba(255, 255, 255, 0.95) !important;
+    color: var(--text-primary);
+}
+
+.sub-item-btn {
+    background: white;
+    border: 1px solid var(--text-primary);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+}
+.sub-item-btn:hover {
+    background: var(--text-primary);
+    color: white;
+}
+
+.sub-menu-close { color: var(--text-muted); }
+
+/* Character Detail in Popup */
+.character-room-detail {
+    border: 1px solid var(--line-color);
+    background: #f9f9f7;
+    padding: 15px;
+}
+
+.character-portrait {
+    border: 1px solid var(--line-color);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.character-info {
+    background: white;
+    border: 1px solid var(--line-color);
+    color: var(--text-primary);
+}
+
+.info-row { border-bottom-color: var(--line-color); }
+
+.info-label { color: var(--text-secondary); }
+.info-value { color: var(--text-primary); font-weight: 600; }
+
+.room-description {
+    background: #fff;
+    border-left: 3px solid var(--text-primary);
+    color: var(--text-secondary);
+}
+.room-description p { color: var(--text-secondary); }
+
+/* User Avatar */
+.user-portrait::before {
+    /* Change glow to subtle grey/red pulse */
+    background: linear-gradient(45deg, #ccc, #fff, #ccc, #a84444);
+}
+.user-portrait::after { color: var(--accent-red); }
+
+/* Participant Checkboxes */
+.participant-item {
+    background: white;
+    border: 1px solid var(--line-color);
+    color: var(--text-primary);
+}
+.participant-item:hover {
+    background: #f0f0f0;
+    border-color: var(--text-primary);
+}
+.participant-item label { color: var(--text-primary); }
+.cte-checkbox { accent-color: var(--accent-red); }
+
+/* Inputs */
+.travel-input {
+    background: #fff !important;
+    border: 1px solid var(--text-primary) !important;
+    color: var(--text-primary) !important;
+    padding: 8px;
+    font-family: var(--font-sans);
+}
+
+/* ==========================================
+   GLOBAL TOGGLE BUTTON (Override)
+   ========================================== */
+/* The ID #cte-toggle-btn is injected by JS with inline gold background. */
+div#cte-toggle-btn {
+    background-color: var(--accent-red) !important;
+    border: 2px solid white !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3) !important;
+    color: white !important;
+}
+
+/* Overlay */
+.popup-overlay {
+    background: rgba(26, 26, 26, 0.6) !important; /* Darker dim for focus */
+    backdrop-filter: blur(2px);
+}

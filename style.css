@@ -1,6 +1,5 @@
-
 /* --- 扩展面板容器 --- */
-#cte-map-panel {
+#cte-idol-map-panel {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -22,7 +21,7 @@
 }
 
 /* 顶部标题栏 */
-#cte-drag-handle {
+#cte-idol-drag-handle {
     width: 100%;
     height: 40px;
     background: #242424;
@@ -41,12 +40,12 @@
 }
 
 /* 顶部导航按钮组 */
-.cte-nav-group {
+.cte-idol-nav-group {
     display: flex;
     gap: 10px;
 }
 
-.cte-nav-btn {
+.cte-idol-nav-btn {
     background: transparent;
     border: none;
     color: #888;
@@ -57,17 +56,17 @@
     transition: all 0.3s;
 }
 
-.cte-nav-btn.active {
+.cte-idol-nav-btn.active {
     color: #e0c5a1;
     border-bottom: 2px solid #b38b59;
 }
 
-.cte-nav-btn:hover {
+.cte-idol-nav-btn:hover {
     color: #e0c5a1;
 }
 
 /* 内容区域 */
-#cte-content-area {
+#cte-idol-content-area {
     height: calc(100% - 40px);
     width: 100%;
     position: relative; /* 改为 relative 以便绝对定位子视图 */
@@ -76,7 +75,7 @@
 }
 
 /* 视图容器 (地图/行程表) */
-.cte-view {
+.cte-idol-view {
     width: 100%;
     height: 100%;
     overflow-y: auto;
@@ -86,16 +85,16 @@
     -webkit-overflow-scrolling: touch;
 }
 
-.cte-view.active {
+.cte-idol-view.active {
     display: block;
 }
 
-.cte-view::-webkit-scrollbar { width: 6px; display: block; }
-.cte-view::-webkit-scrollbar-track { background: #1a1a1a; }
-.cte-view::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+.cte-idol-view::-webkit-scrollbar { width: 6px; display: block; }
+.cte-idol-view::-webkit-scrollbar-track { background: #1a1a1a; }
+.cte-idol-view::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
 
 /* --- 弹窗样式 --- */
-.cte-popup {
+.cte-idol-popup {
     display: none;
     position: absolute; 
     top: 50%;
@@ -116,13 +115,13 @@
     text-align: left;
 }
 
-.cte-popup::-webkit-scrollbar { width: 4px; }
-.cte-popup::-webkit-scrollbar-thumb { background: #555; border-radius: 2px; }
+.cte-idol-popup::-webkit-scrollbar { width: 4px; }
+.cte-idol-popup::-webkit-scrollbar-thumb { background: #555; border-radius: 2px; }
 
 /* --- 基础内容样式 --- */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;700&family=Noto+Serif+SC:wght@400;700&display=swap');
 
-.cte-wrapper {
+.cte-idol-wrapper {
     color: #dcdcdc;
     display: flex;
     flex-direction: column;
@@ -132,13 +131,13 @@
     box-sizing: border-box;
 }
 
-.cte-wrapper h1, .cte-wrapper h2 {
+.cte-idol-wrapper h1, .cte-idol-wrapper h2 {
     font-family: 'Cormorant Garamond', serif;
     text-align: center;
     color: #e0c5a1;
     margin: 5px 0;
 }
-.cte-wrapper h2 {
+.cte-idol-wrapper h2 {
     font-size: 14px;
     font-style: italic;
     color: #888;
@@ -148,7 +147,7 @@
     margin-bottom: 15px;
 }
 
-.controls-bar {
+.cte-idol-controls-bar {
     background: #242424;
     border: 1px solid #b38b59;
     padding: 10px;
@@ -165,7 +164,7 @@
     max-width: 700px;
 }
 
-.cte-btn {
+.cte-idol-btn {
     border: 1px solid #b38b59;
     color: #e0c5a1;
     background-color: transparent;
@@ -178,32 +177,32 @@
     display: inline-block;
     font-size: 13px;
 }
-.cte-btn:hover { background-color: #b38b59; color: #1a1a1a; }
+.cte-idol-btn:hover { background-color: #b38b59; color: #1a1a1a; }
 
 /* ========================================== */
 /* === 行程表样式 (Timeline) === */
 /* ========================================== */
 
-.cte-timeline-container {
+.cte-idol-timeline-container {
     width: 100%;
     max-width: 700px;
     padding: 10px 20px;
     box-sizing: border-box;
 }
 
-.cte-timeline-item {
+.cte-idol-timeline-item {
     display: flex;
     margin-bottom: 2rem;
     position: relative;
     padding-left: 60px; /* 留出时间标签的位置 */
 }
 
-.cte-timeline-item:last-child {
+.cte-idol-timeline-item:last-child {
     margin-bottom: 4rem; /* 底部留白 */
 }
 
 /* 连接线 */
-.cte-timeline-item::before {
+.cte-idol-timeline-item::before {
     content: '';
     position: absolute;
     left: 19px; /* 线的位置 */
@@ -214,12 +213,12 @@
     border-left: 1px dashed #b38b59; /* 金色虚线装饰 */
 }
 
-.cte-timeline-item:last-child::before {
+.cte-idol-timeline-item:last-child::before {
     display: none;
 }
 
 /* 时间标签 */
-.cte-timeline-time {
+.cte-idol-timeline-time {
     position: absolute;
     left: -10px;
     top: 0;
@@ -237,7 +236,7 @@
 }
 
 /* 内容卡片 */
-.cte-timeline-content {
+.cte-idol-timeline-content {
     background: rgba(36, 36, 36, 0.8);
     border: 1px solid #444;
     border-left: 3px solid #b38b59; /* 左侧金色强调 */
@@ -248,13 +247,13 @@
     position: relative;
 }
 
-.cte-timeline-content:hover {
+.cte-idol-timeline-content:hover {
     transform: translateX(5px);
     box-shadow: 0 0 15px rgba(179, 139, 89, 0.15);
     border-color: #666;
 }
 
-.cte-schedule-title {
+.cte-idol-schedule-title {
     font-size: 16px;
     font-weight: 700;
     color: #e0c5a1;
@@ -265,14 +264,14 @@
     align-items: center;
 }
 
-.cte-schedule-desc {
+.cte-idol-schedule-desc {
     color: #a4a6a8;
     font-size: 13px;
     line-height: 1.5;
     margin-bottom: 12px;
 }
 
-.cte-tag {
+.cte-idol-tag {
     display: inline-block;
     background-color: rgba(179, 139, 89, 0.2);
     color: #b38b59;
@@ -284,7 +283,7 @@
 }
 
 /* 执行按钮 */
-.cte-exec-btn {
+.cte-idol-exec-btn {
     width: 100%;
     padding: 5px;
     font-size: 12px;
@@ -297,7 +296,7 @@
     text-align: center;
 }
 
-.cte-exec-btn:hover {
+.cte-idol-exec-btn:hover {
     background: #b38b59;
     color: #1a1a1a;
 }
@@ -305,7 +304,7 @@
 /* ========================================== */
 /* === 参与者选择弹窗样式 === */
 /* ========================================== */
-.participant-grid {
+.cte-idol-participant-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr); /* 两列布局 */
     gap: 8px;
@@ -315,7 +314,7 @@
     padding: 5px;
 }
 
-.participant-item {
+.cte-idol-participant-item {
     display: flex;
     align-items: center;
     background: rgba(0,0,0,0.3);
@@ -326,26 +325,26 @@
     transition: all 0.2s;
 }
 
-.participant-item:hover {
+.cte-idol-participant-item:hover {
     border-color: #b38b59;
     background: rgba(179, 139, 89, 0.1);
 }
 
-.cte-checkbox {
+.cte-idol-checkbox {
     margin-right: 8px;
     accent-color: #b38b59; /* 金色复选框 */
     cursor: pointer;
 }
 
-.participant-item label {
+.cte-idol-participant-item label {
     cursor: pointer;
     font-size: 13px;
     color: #dcdcdc;
     flex: 1;
 }
 
-/* 地图容器 (保持原有样式) */
-.map-container {
+/* 地图容器 */
+.cte-idol-map-container {
     position: relative;
     width: 100%;
     max-width: 700px;
@@ -365,7 +364,7 @@
     touch-action: none;
 }
 
-.location {
+.cte-idol-location {
     position: absolute;
     cursor: grab;
     transition: transform 0.2s ease;
@@ -382,41 +381,41 @@
     transform: translate(-50%, -50%);
     touch-action: none;
 }
-.location:active { cursor: grabbing; }
-.location:hover { z-index: 20; background-color: #b38b59; color: #1a1a1a !important; }
-.location.dragging { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); background-color: #e0c5a1; color: #000 !important; }
-.location .label { font-size: 12px; font-weight: bold; pointer-events: none; }
+.cte-idol-location:active { cursor: grabbing; }
+.cte-idol-location:hover { z-index: 20; background-color: #b38b59; color: #1a1a1a !important; }
+.cte-idol-location.dragging { opacity: 0.8; transform: translate(-50%, -50%) scale(1.1); background-color: #e0c5a1; color: #000 !important; }
+.cte-idol-location .label { font-size: 12px; font-weight: bold; pointer-events: none; }
 
-.cte-popup h3 { color: #e0c5a1; border-bottom: 1px solid #555; padding-bottom: 10px; margin-top: 0; font-size: 18px; }
-.cte-popup p { font-size: 14px; line-height: 1.6; color: #dcdcdc; }
+.cte-idol-popup h3 { color: #e0c5a1; border-bottom: 1px solid #555; padding-bottom: 10px; margin-top: 0; font-size: 18px; }
+.cte-idol-popup p { font-size: 14px; line-height: 1.6; color: #dcdcdc; }
 
-.popup-image { width: 100%; height: auto; max-height: 200px; object-fit: cover; margin: 15px 0; border: 1px solid #444; display: block; }
-.popup-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 20001; }
+.cte-idol-popup-image { width: 100%; height: auto; max-height: 200px; object-fit: cover; margin: 15px 0; border: 1px solid #444; display: block; }
+.cte-idol-popup-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 20001; }
 
-.interior-container { position: relative; width: 100%; margin-top: 15px; border: 1px solid #444; }
-.interior-image { width: 100%; height: auto; display: block; }
-.floor-nav { position: absolute; top: 50%; left: 5px; transform: translateY(-50%); display: flex; flex-direction: column; gap: 4px; z-index: 10; }
-.floor-btn { background-color: rgba(0,0,0,0.85); border: 1px solid #b38b59; color: #e0c5a1; padding: 4px 8px; cursor: pointer; text-align: left; font-size: 11px; }
+.cte-idol-interior-container { position: relative; width: 100%; margin-top: 15px; border: 1px solid #444; }
+.cte-idol-interior-image { width: 100%; height: auto; display: block; }
+.cte-idol-floor-nav { position: absolute; top: 50%; left: 5px; transform: translateY(-50%); display: flex; flex-direction: column; gap: 4px; z-index: 10; }
+.cte-idol-floor-btn { background-color: rgba(0,0,0,0.85); border: 1px solid #b38b59; color: #e0c5a1; padding: 4px 8px; cursor: pointer; text-align: left; font-size: 11px; }
 
-.sub-menu-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 20; flex-direction: column; justify-content: center; align-items: center; padding: 10px; box-sizing: border-box; text-align: center; }
-.sub-menu-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; width: 100%; max-height: 80%; overflow-y: auto; }
-.sub-item-btn { background: transparent; border: 1px solid #666; color: #dcdcdc; padding: 6px; cursor: pointer; font-size: 12px; }
+.cte-idol-sub-menu-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 20; flex-direction: column; justify-content: center; align-items: center; padding: 10px; box-sizing: border-box; text-align: center; }
+.cte-idol-sub-menu-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; width: 100%; max-height: 80%; overflow-y: auto; }
+.cte-idol-sub-item-btn { background: transparent; border: 1px solid #666; color: #dcdcdc; padding: 6px; cursor: pointer; font-size: 12px; }
 
-#travel-menu-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 20005; justify-content: center; align-items: center; }
-.travel-menu-box { position: relative; background: #242424; border: 1px solid #b38b59; padding: 20px; width: 85%; max-width: 300px; text-align: center; }
-.travel-input { width: 90%; padding: 8px; margin-bottom: 15px; background: #1a1a1a; border: 1px solid #b38b59; color: #dcdcdc; text-align: center; }
+#cte-idol-travel-menu-overlay { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 20005; justify-content: center; align-items: center; }
+.cte-idol-travel-menu-box { position: relative; background: #242424; border: 1px solid #b38b59; padding: 20px; width: 85%; max-width: 300px; text-align: center; }
+.cte-idol-travel-input { width: 90%; padding: 8px; margin-bottom: 15px; background: #1a1a1a; border: 1px solid #b38b59; color: #dcdcdc; text-align: center; }
 
 /* Colors */
-#dorm { color: #81c784; } #office { color: #64b5f6; } #villa { color: #ba68c8; } #office2 { color: #e57373; }
-#office3 { color: #90caf9; } #office4 { color: #b39ddb; } #highschool { color: #ffcc80; } #gov { color: #ef9a9a; }
-#PrivateClub { color: #ce93d8; } #TVstation { color: #80cbc4; } #airport { color: #b0bec5; } #port { color: #a5d6a7; }
-#other-places { color: #ffe0b2; }
+#cte-idol-loc-dorm { color: #81c784; } #cte-idol-loc-office { color: #64b5f6; } #cte-idol-loc-villa { color: #ba68c8; } #cte-idol-loc-office2 { color: #e57373; }
+#cte-idol-loc-office3 { color: #90caf9; } #cte-idol-loc-office4 { color: #b39ddb; } #cte-idol-loc-highschool { color: #ffcc80; } #cte-idol-loc-gov { color: #ef9a9a; }
+#cte-idol-loc-PrivateClub { color: #ce93d8; } #cte-idol-loc-TVstation { color: #80cbc4; } #cte-idol-loc-airport { color: #b0bec5; } #cte-idol-loc-port { color: #a5d6a7; }
+#cte-idol-loc-other-places { color: #ffe0b2; }
 
 /* ========================================== */
 /* === 角色房间资料卡片样式 === */
 /* ========================================== */
 
-.character-room-detail {
+.cte-idol-character-room-detail {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -428,7 +427,7 @@
 }
 
 /* 角色头像容器 */
-.character-portrait {
+.cte-idol-character-portrait {
     width: 150px;
     height: 150px;
     border-radius: 50%;
@@ -438,7 +437,7 @@
     flex-shrink: 0;
 }
 
-.character-image {
+.cte-idol-character-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -446,12 +445,12 @@
     transition: transform 0.3s ease;
 }
 
-.character-portrait:hover .character-image {
+.cte-idol-character-portrait:hover .cte-idol-character-image {
     transform: scale(1.1);
 }
 
 /* 角色信息区域 */
-.character-info {
+.cte-idol-character-info {
     width: 100%;
     background: rgba(36, 36, 36, 0.8);
     border: 1px solid #444;
@@ -459,7 +458,7 @@
     padding: 12px 15px;
 }
 
-.info-row {
+.cte-idol-info-row {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -467,11 +466,11 @@
     border-bottom: 1px solid #333;
 }
 
-.info-row:last-child {
+.cte-idol-info-row:last-child {
     border-bottom: none;
 }
 
-.info-label {
+.cte-idol-info-label {
     color: #b38b59;
     font-weight: bold;
     font-size: 13px;
@@ -479,7 +478,7 @@
     flex-shrink: 0;
 }
 
-.info-value {
+.cte-idol-info-value {
     color: #e0c5a1;
     font-size: 13px;
     text-align: right;
@@ -488,7 +487,7 @@
 }
 
 /* 房间描述 */
-.room-description {
+.cte-idol-room-description {
     width: 100%;
     background: rgba(26, 26, 26, 0.6);
     border-left: 3px solid #b38b59;
@@ -496,7 +495,7 @@
     border-radius: 0 4px 4px 0;
 }
 
-.room-description p {
+.cte-idol-room-description p {
     margin: 0;
     font-size: 12px;
     line-height: 1.6;
@@ -505,7 +504,7 @@
 }
 
 /* 操作按钮区域 */
-.action-buttons {
+.cte-idol-action-buttons {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -514,17 +513,17 @@
     margin-top: 5px;
 }
 
-.action-buttons .cte-btn {
+.cte-idol-action-buttons .cte-idol-btn {
     min-width: 120px;
 }
 
-.action-buttons .sub-item-btn {
+.cte-idol-action-buttons .cte-idol-sub-item-btn {
     font-size: 11px;
     padding: 6px 12px;
 }
 
 /* 角色卡片悬停动画 */
-.character-info:hover {
+.cte-idol-character-info:hover {
     border-color: #b38b59;
     box-shadow: 0 0 15px rgba(179, 139, 89, 0.2);
 }
@@ -534,12 +533,12 @@
 /* ========================================== */
 
 /* 无头像时的占位符样式 */
-.character-portrait.no-avatar {
+.cte-idol-character-portrait.no-avatar {
     background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%);
     cursor: pointer;
 }
 
-.avatar-placeholder {
+.cte-idol-avatar-placeholder {
     width: 100%;
     height: 100%;
     display: flex;
@@ -550,23 +549,23 @@
     transition: all 0.3s ease;
 }
 
-.avatar-placeholder:hover {
+.cte-idol-avatar-placeholder:hover {
     background: rgba(179, 139, 89, 0.1);
 }
 
-.placeholder-icon {
+.cte-idol-placeholder-icon {
     font-size: 36px;
     opacity: 0.5;
 }
 
-.placeholder-text {
+.cte-idol-placeholder-text {
     font-size: 10px;
     color: #888;
     text-align: center;
 }
 
 /* 头像上传区域 */
-.avatar-upload-section {
+.cte-idol-avatar-upload-section {
     display: flex;
     gap: 8px;
     justify-content: center;
@@ -574,7 +573,7 @@
     flex-wrap: wrap;
 }
 
-.avatar-upload-btn {
+.cte-idol-avatar-upload-btn {
     position: relative;
     overflow: hidden;
     display: inline-flex;
@@ -583,7 +582,7 @@
     cursor: pointer;
 }
 
-.avatar-upload-btn input[type=file] {
+.cte-idol-avatar-upload-btn input[type=file] {
     position: absolute;
     left: 0;
     top: 0;
@@ -594,23 +593,23 @@
     z-index: 10;
 }
 
-.avatar-delete-btn {
+.cte-idol-avatar-delete-btn {
     background: transparent;
     border: 1px solid #e57373 !important;
     color: #e57373 !important;
 }
 
-.avatar-delete-btn:hover {
+.cte-idol-avatar-delete-btn:hover {
     background: #e57373 !important;
     color: #1a1a1a !important;
 }
 
 /* 用户头像特殊边框动画 */
-.user-portrait {
+.cte-idol-user-portrait {
     position: relative;
 }
 
-.user-portrait::before {
+.cte-idol-user-portrait::before {
     content: '';
     position: absolute;
     top: -3px;
@@ -626,7 +625,7 @@
     transition: opacity 0.3s ease;
 }
 
-.user-portrait:hover::before {
+.cte-idol-user-portrait:hover::before {
     opacity: 1;
 }
 
@@ -637,7 +636,7 @@
 }
 
 /* 用户头像提示标签 */
-.user-portrait::after {
+.cte-idol-user-portrait::after {
     content: '✨ 你';
     position: absolute;
     bottom: -22px;
@@ -653,7 +652,7 @@
 /* === 国家地图相关样式 === */
 /* ========================================== */
 
-.national-map-container {
+.cte-idol-national-map-container {
     position: relative;
     width: 100%;
     max-width: 700px;
@@ -674,7 +673,7 @@
     touch-action: none;
 }
 
-.national-city {
+.cte-idol-national-city {
     position: absolute;
     display: flex;
     flex-direction: column;
@@ -688,18 +687,18 @@
     touch-action: none;
 }
 
-.national-city:active {
+.cte-idol-national-city:active {
     cursor: grabbing;
 }
 
 /* 移除 :hover 的 transform 放大，避免干扰拖拽体验 */
-.national-city:hover {
+.cte-idol-national-city:hover {
     /* transform: translate(-50%, -50%) scale(1.1); */
     filter: drop-shadow(0 0 8px #d4b27a);
     z-index: 100;
 }
 
-.national-city i {
+.cte-idol-national-city i {
     font-size: 24px;
     color: #c0a062;
     text-shadow: 0 0 4px #c0a062;
@@ -707,7 +706,7 @@
     pointer-events: none; /* 防止图标干扰点击 */
 }
 
-.national-city .name {
+.cte-idol-national-city .name {
     font-size: 12px;
     color: #dcdcdc;
     background: rgba(0,0,0,0.7);
@@ -717,7 +716,7 @@
     pointer-events: none;
 }
 
-.national-info-panel {
+.cte-idol-national-info-panel {
     width: 100%;
     max-width: 700px;
     background: rgba(0,0,0,0.3);
@@ -728,7 +727,7 @@
     box-sizing: border-box;
 }
 
-.national-info-panel h2 {
+.cte-idol-national-info-panel h2 {
     font-size: 18px;
     color: #d4b27a;
     margin: 0 0 15px 0;
@@ -737,19 +736,19 @@
     font-family: 'Noto Serif SC', serif;
 }
 
-.national-info-panel p {
+.cte-idol-national-info-panel p {
     margin: 0;
     line-height: 1.7;
     font-size: 14px;
 }
 
-.national-info-panel ul {
+.cte-idol-national-info-panel ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
 }
 
-.national-info-panel li {
+.cte-idol-national-info-panel li {
     margin-bottom: 8px;
     display: flex;
     align-items: flex-start;
@@ -757,7 +756,7 @@
 
 /* --- 移动端 & 平板端 深度适配 (iPad/iPhone) --- */
 @media screen and (max-width: 1180px) {
-    #cte-map-panel {
+    #cte-idol-map-panel {
         width: 95vw;          /* 占满屏幕宽度 */
         height: 90dvh;        /* 动态视口高度，防止 Safari 地址栏遮挡 */
         max-height: none;     /* 取消最大高度限制，由 dvh 控制 */
@@ -769,109 +768,109 @@
     }
     
     /* 让地图容器自适应，不要强制 700px */
-    .map-container, .national-map-container, .national-info-panel, .controls-bar, .cte-timeline-container {
+    .cte-idol-map-container, .cte-idol-national-map-container, .cte-idol-national-info-panel, .cte-idol-controls-bar, .cte-idol-timeline-container {
         width: 100%; 
         max-width: 100%; /* 允许填满面板宽度 */
     }
 
     /* 缩小地图上的标签，防止重叠 */
-    .location {
+    .cte-idol-location {
         padding: 3px 6px;
         border-width: 1px;
     }
-    .location .label {
+    .cte-idol-location .label {
         font-size: 11px;
     }
 
-    .controls-bar {
+    .cte-idol-controls-bar {
         padding: 5px;
         gap: 5px;
     }
     
-    .cte-btn {
+    .cte-idol-btn {
         padding: 4px 8px;
         font-size: 12px;
     }
 
-    .cte-popup {
+    .cte-idol-popup {
         width: 90%;
         padding: 15px;
     }
     
-    .cte-popup h3 {
+    .cte-idol-popup h3 {
         font-size: 16px;
     }
 
     /* 移动端角色卡片适配 */
-    .character-room-detail {
+    .cte-idol-character-room-detail {
         max-width: 100%;
         padding: 8px;
         gap: 12px;
     }
 
-    .character-portrait {
+    .cte-idol-character-portrait {
         width: 120px;
         height: 120px;
     }
 
-    .character-info {
+    .cte-idol-character-info {
         padding: 10px 12px;
     }
 
-    .info-row {
+    .cte-idol-info-row {
         padding: 6px 0;
     }
 
-    .info-label {
+    .cte-idol-info-label {
         font-size: 12px;
     }
 
-    .info-value {
+    .cte-idol-info-value {
         font-size: 12px;
     }
 
-    .room-description p {
+    .cte-idol-room-description p {
         font-size: 11px;
     }
 
-    .avatar-upload-section {
+    .cte-idol-avatar-upload-section {
         gap: 6px;
     }
 
-    .placeholder-icon {
+    .cte-idol-placeholder-icon {
         font-size: 28px;
     }
 
-    .placeholder-text {
+    .cte-idol-placeholder-text {
         font-size: 9px;
     }
 
-    .user-portrait::after {
+    .cte-idol-user-portrait::after {
         font-size: 10px;
         bottom: -20px;
     }
 }
 
 @media screen and (max-width: 480px) {
-    .character-portrait {
+    .cte-idol-character-portrait {
         width: 100px;
         height: 100px;
     }
 
-    .info-row {
+    .cte-idol-info-row {
         flex-direction: column;
         gap: 3px;
     }
 
-    .info-value {
+    .cte-idol-info-value {
         text-align: left;
     }
 
-    .avatar-upload-section {
+    .cte-idol-avatar-upload-section {
         flex-direction: column;
     }
     
-    .participant-grid {
+    .cte-idol-participant-grid {
         grid-template-columns: 1fr;
     }
 }
@@ -879,7 +878,7 @@
 /* ==========================================================================
    [NEW] RPG MANAGER STYLES
    ========================================================================== */
-.cte-rpg-container {
+.cte-idol-rpg-container {
     width: 100%;
     height: 100%;
     display: flex;
@@ -889,7 +888,7 @@
 }
 
 /* RPG Sidebar */
-.cte-rpg-sidebar {
+.cte-idol-rpg-sidebar {
     width: 60px;
     background: #121212;
     border-right: 1px solid rgba(212, 175, 55, 0.2);
@@ -901,7 +900,7 @@
     flex-shrink: 0;
 }
 
-.cte-rpg-logo {
+.cte-idol-rpg-logo {
     width: 36px;
     height: 36px;
     border: 1px solid #c5a065;
@@ -913,7 +912,7 @@
     box-shadow: 0 0 8px rgba(197, 160, 101, 0.2);
 }
 
-.cte-rpg-logo span {
+.cte-idol-rpg-logo span {
     transform: rotate(-45deg);
     font-family: 'Cormorant Garamond', serif;
     font-weight: bold;
@@ -921,7 +920,7 @@
     font-size: 18px;
 }
 
-.cte-rpg-nav-btn {
+.cte-idol-rpg-nav-btn {
     width: 40px;
     height: 40px;
     background: transparent;
@@ -933,20 +932,20 @@
     border-radius: 4px;
 }
 
-.cte-rpg-nav-btn:hover, .cte-rpg-nav-btn.active {
+.cte-idol-rpg-nav-btn:hover, .cte-idol-rpg-nav-btn.active {
     color: #c5a065;
     background: rgba(255,255,255,0.05);
 }
 
 /* RPG Main */
-.cte-rpg-main {
+.cte-idol-rpg-main {
     flex: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
-.cte-rpg-hud {
+.cte-idol-rpg-hud {
     height: 50px;
     background: rgba(0,0,0,0.5);
     border-bottom: 1px solid rgba(212, 175, 55, 0.2);
@@ -957,9 +956,9 @@
     flex-shrink: 0;
 }
 
-.cte-rpg-res-group { display: flex; gap: 20px; }
-.cte-rpg-res-item { display: flex; gap: 8px; align-items: center; }
-.cte-rpg-res-icon { 
+.cte-idol-rpg-res-group { display: flex; gap: 20px; }
+.cte-idol-rpg-res-item { display: flex; gap: 8px; align-items: center; }
+.cte-idol-rpg-res-icon { 
     width: 24px; height: 24px; 
     border-radius: 50%; 
     background: #1a1a1a; 
@@ -967,17 +966,17 @@
     display: flex; align-items: center; justify-content: center; 
     font-size: 12px;
 }
-.cte-rpg-res-val { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: bold; }
-.cte-rpg-res-label { font-size: 9px; text-transform: uppercase; color: #666; margin-left: 2px;}
+.cte-idol-rpg-res-val { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: bold; }
+.cte-idol-rpg-res-label { font-size: 9px; text-transform: uppercase; color: #666; margin-left: 2px;}
 
 /* RPG Roster Grid */
-.cte-rpg-roster-grid {
+.cte-idol-rpg-roster-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 15px;
 }
 
-.cte-rpg-card {
+.cte-idol-rpg-card {
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(212, 175, 55, 0.2);
     padding: 15px;
@@ -985,12 +984,12 @@
     transition: all 0.3s;
 }
 
-.cte-rpg-card:hover {
+.cte-idol-rpg-card:hover {
     border-color: #c5a065;
     background: rgba(255,255,255,0.05);
 }
 
-.cte-rpg-avatar-box {
+.cte-idol-rpg-avatar-box {
     width: 60px; height: 60px;
     border: 1px solid #333;
     display: flex; align-items: center; justify-content: center;
@@ -999,23 +998,23 @@
     overflow: hidden;
 }
 
-.cte-rpg-avatar-box img {
+.cte-idol-rpg-avatar-box img {
     width: 100%; height: 100%; object-fit: cover;
 }
 
-.cte-rpg-role-tag {
+.cte-idol-rpg-role-tag {
     position: absolute; bottom: 0; right: 0;
     background: #000; color: #c5a065; 
     font-family: 'JetBrains Mono', monospace; font-size: 9px; 
     padding: 1px 4px; border-top: 1px solid #c5a065; border-left: 1px solid #c5a065;
 }
 
-.cte-rpg-stat-row { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.cte-rpg-stat-bar-container .label { font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 2px; display: flex; justify-content: space-between; }
-.cte-rpg-stat-bar-container .bar-bg { width: 100%; height: 3px; background: #222; }
-.cte-rpg-stat-bar-container .bar-fill { height: 100%; box-shadow: 0 0 5px currentColor; }
+.cte-idol-rpg-stat-row { margin-top: 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.cte-idol-rpg-stat-bar-container .label { font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 2px; display: flex; justify-content: space-between; }
+.cte-idol-rpg-stat-bar-container .bar-bg { width: 100%; height: 3px; background: #222; }
+.cte-idol-rpg-stat-bar-container .bar-fill { height: 100%; box-shadow: 0 0 5px currentColor; }
 
-.cte-rpg-warning-box {
+.cte-idol-rpg-warning-box {
     margin-top: 10px;
     background: rgba(236, 72, 153, 0.1);
     border: 1px solid #ec4899;
@@ -1029,7 +1028,7 @@
     animation: pulseWarning 2s infinite;
 }
 
-.cte-heartbeat-shortcut {
+.cte-idol-heartbeat-shortcut {
     background: #ec4899;
     color: white;
     border: none;
@@ -1048,7 +1047,7 @@
 /* ==========================================================================
    [NEW] HEARTBEAT STYLE (PINK THEME)
    ========================================================================== */
-.cte-hb-container {
+.cte-idol-hb-container {
     width: 100%;
     height: 100%;
     background-color: #FFF0F5;
@@ -1056,14 +1055,14 @@
     overflow-y: auto;
 }
 
-.cte-hb-header {
+.cte-idol-hb-header {
     background-color: #FFB6C1;
     padding: 20px;
     text-align: center;
     border-bottom: 4px solid #FFD1DC;
 }
 
-.cte-hb-header h1 {
+.cte-idol-hb-header h1 {
     font-family: 'Cormorant Garamond', serif;
     font-weight: 700;
     color: #fff;
@@ -1072,15 +1071,15 @@
     text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 
-.cte-hb-content { padding: 20px; }
+.cte-idol-hb-content { padding: 20px; }
 
-.cte-hb-grid {
+.cte-idol-hb-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 15px;
 }
 
-.cte-hb-activity-card {
+.cte-idol-hb-activity-card {
     background-color: #fff;
     border-radius: 12px;
     padding: 15px;
@@ -1090,26 +1089,26 @@
     box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
-.cte-hb-activity-card:hover {
+.cte-idol-hb-activity-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 15px rgba(231, 84, 128, 0.15);
     border-color: #FF69B4;
 }
 
-.cte-hb-activity-icon {
+.cte-idol-hb-activity-icon {
     font-size: 2rem;
     color: #FF69B4;
     margin-bottom: 10px;
 }
 
-.cte-hb-activity-name {
+.cte-idol-hb-activity-name {
     font-weight: bold;
     color: #555;
     margin-bottom: 8px;
     font-size: 14px;
 }
 
-.cte-hb-activity-desc {
+.cte-idol-hb-activity-desc {
     font-size: 11px;
     color: #888;
     margin-bottom: 15px;
@@ -1117,7 +1116,7 @@
     min-height: 2.8em;
 }
 
-.cte-hb-btn {
+.cte-idol-hb-btn {
     padding: 6px 15px;
     background-color: #FF69B4;
     color: white;
@@ -1127,10 +1126,10 @@
     font-size: 12px;
     transition: background 0.3s;
 }
-.cte-hb-btn:hover { background-color: #E75480; }
+.cte-idol-hb-btn:hover { background-color: #E75480; }
 
 /* Heartbeat Modal Specifics */
-.cte-hb-modal {
+.cte-idol-hb-modal {
     display: none;
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -1139,9 +1138,9 @@
     justify-content: center;
     align-items: center;
 }
-.cte-hb-modal.active { display: flex; }
+.cte-idol-hb-modal.active { display: flex; }
 
-.cte-hb-modal-content {
+.cte-idol-hb-modal-content {
     background: #fff;
     padding: 20px;
     border-radius: 15px;
@@ -1152,7 +1151,7 @@
     color: #333;
 }
 
-.cte-hb-member-list {
+.cte-idol-hb-member-list {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -1160,32 +1159,32 @@
     margin: 15px 0;
 }
 
-.cte-hb-member-item {
+.cte-idol-hb-member-item {
     width: 60px;
     cursor: pointer;
     transition: transform 0.2s;
 }
-.cte-hb-member-item:hover { transform: scale(1.1); }
+.cte-idol-hb-member-item:hover { transform: scale(1.1); }
 
-.cte-hb-member-avatar {
+.cte-idol-hb-member-avatar {
     width: 50px; height: 50px;
     border-radius: 50%;
     border: 2px solid #FFD1DC;
     background-size: cover;
     margin: 0 auto;
 }
-.cte-hb-member-item.selected .cte-hb-member-avatar {
+.cte-idol-hb-member-item.selected .cte-idol-hb-member-avatar {
     border-color: #FF69B4;
     box-shadow: 0 0 0 3px rgba(255,105,180,0.3);
 }
-.cte-hb-member-name {
+.cte-idol-hb-member-name {
     font-size: 10px; margin-top: 4px; color: #666;
 }
-.cte-hb-member-item.selected .cte-hb-member-name { color: #FF69B4; font-weight: bold; }
+.cte-idol-hb-member-item.selected .cte-idol-hb-member-name { color: #FF69B4; font-weight: bold; }
 
-.cte-hb-assign-button {
+.cte-idol-hb-assign-button {
     background: #FF69B4; color: #fff; border:none; padding:8px 20px; border-radius:20px; cursor:pointer;
 }
-.cte-hb-close-button {
+.cte-idol-hb-close-button {
     background: #ccc; color: #fff; border:none; padding:8px 20px; border-radius:20px; cursor:pointer;
 }

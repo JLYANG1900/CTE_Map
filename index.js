@@ -123,7 +123,7 @@
         }
     };
 
-    // [新增] 从 status_bottom1 读取角色动态状态 (欲望/好感)
+    // [新增] 从 status_bottom1 读取角色动态状态 (欲望/好感) - 文本解析
     window.CTEMap.readCharacterStatsFromChat = function() {
         // 1. 获取 ST 上下文
         let context = stContext;
@@ -170,7 +170,76 @@
                 }
             }
         }
-        console.log("[CTE Map] Character stats updated from chat.");
+        console.log("[CTE Map] Character stats updated from chat (text tag).");
+    };
+
+    // [新增] 读取 MVU (stat_data) 变量逻辑 - 支持 SillyTavern 变量系统
+    window.CTEMap.readStatsFromMVU = function() {
+        let ST = window.SillyTavern;
+        if (!ST && window.parent) ST = window.parent.SillyTavern;
+        if (!ST) return;
+
+        let statDataRaw = null;
+
+        // 1. 尝试从 Extension Settings 读取 (最新的变量状态)
+        try {
+            const extVars = ST.extension_settings?.variables;
+            if (extVars) {
+                if (extVars.global && extVars.global['stat_data']) statDataRaw = extVars.global['stat_data'];
+                else if (extVars.local && extVars.local['stat_data']) statDataRaw = extVars.local['stat_data'];
+            }
+        } catch (e) { console.warn("[CTE] Error reading ext settings:", e); }
+
+        // 2. 如果没找到，扫描聊天记录 (回退方案)
+        if (!statDataRaw && stContext && stContext.chat) {
+            const chat = stContext.chat;
+            for (let i = chat.length - 1; i >= 0; i--) {
+                const msg = chat[i];
+                const vars = msg.variables || (msg.data && msg.data.variables);
+                if (vars) {
+                    // 兼容对象或数组结构
+                    if (typeof vars === 'object' && !Array.isArray(vars) && vars['stat_data']) {
+                        statDataRaw = vars['stat_data'];
+                        break;
+                    } else if (Array.isArray(vars)) {
+                        // 某些版本可能是数组
+                        const found = vars.find(v => v && v['stat_data']);
+                        if (found) {
+                            statDataRaw = found['stat_data'];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (statDataRaw) {
+            try {
+                // 如果是字符串则解析 JSON
+                const statData = typeof statDataRaw === 'string' ? JSON.parse(statDataRaw) : statDataRaw;
+                
+                if (statData && statData.MainCharacters) {
+                    for (const [name, profile] of Object.entries(window.CTEMap.characterProfiles)) {
+                        if (name === '你') continue;
+                        
+                        // 尝试匹配角色名 (stat_data中的Key通常是中文名)
+                        const charData = statData.MainCharacters[name];
+                        
+                        if (charData) {
+                            // 读取欲望
+                            if (charData['欲望'] !== undefined) profile.status.desire = parseInt(charData['欲望']);
+                            
+                            // 读取好感 (兼容 '好感' 和 '好感度')
+                            if (charData['好感'] !== undefined) profile.status.affection = parseInt(charData['好感']);
+                            else if (charData['好感度'] !== undefined) profile.status.affection = parseInt(charData['好感度']);
+                        }
+                    }
+                    console.log("[CTE Map] Success: Stats updated from MVU stat_data.");
+                }
+            } catch (e) {
+                console.error("[CTE Map] Failed to parse stat_data:", e);
+            }
+        }
     };
 
     // 2.2 渲染事务所内容
@@ -383,7 +452,8 @@
             }
             if (viewName === 'manager') {
                 window.CTEMap.scanForRPGStats();
-                window.CTEMap.readCharacterStatsFromChat(); // [已调用] 读取数据
+                window.CTEMap.readStatsFromMVU(); // [Priority] Try reading from MVU (stat_data)
+                window.CTEMap.readCharacterStatsFromChat(); // [Fallback/Complement] Read from status_bottom1 text
                 window.CTEMap.renderRPGContent('dashboard'); 
             }
             if (viewName === 'heartbeat') {
@@ -534,6 +604,7 @@
                     // 检查当前视图并刷新
                     if ($('#cte-view-schedule').hasClass('active')) window.CTEMap.refreshSchedule();
                     if ($('#cte-view-manager').hasClass('active')) {
+                        window.CTEMap.readStatsFromMVU();
                         window.CTEMap.readCharacterStatsFromChat();
                         window.CTEMap.renderRPGContent('dashboard');
                     }

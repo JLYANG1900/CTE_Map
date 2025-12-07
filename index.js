@@ -452,8 +452,8 @@
             }
             if (viewName === 'manager') {
                 window.CTEMap.scanForRPGStats();
-                window.CTEMap.readStatsFromMVU(); // [Priority] Try reading from MVU (stat_data)
-                window.CTEMap.readCharacterStatsFromChat(); // [Fallback/Complement] Read from status_bottom1 text
+                window.CTEMap.readStatsFromMVU();
+                window.CTEMap.readCharacterStatsFromChat();
                 window.CTEMap.renderRPGContent('dashboard'); 
             }
             if (viewName === 'heartbeat') {
@@ -818,7 +818,7 @@
                     <div class="cte-timeline-time">${item.time}</div>
                     <div class="cte-timeline-content">
                         <div class="cte-schedule-title"><span>${displayContent}</span>${tagsHtml}</div>
-                        <button class="cte-exec-btn" onclick="window.CTEMap.openParticipantSelection('${item.raw.replace(/'/g, "\\'")}')">⚡ 执行行程</button>
+                        <button class="cte-exec-btn" onclick="window.CTEMap.openParticipantSelection('${item.raw.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')">⚡ 执行行程</button>
                     </div>
                 </div>`;
             container.append(html);
@@ -828,28 +828,56 @@
     window.CTEMap.openParticipantSelection = function(itemText) {
         window.CTEMap.isSelectingForSchedule = false; 
         window.CTEMap.currentScheduleItem = itemText;
-        const listContainer = $('#cte-participant-list');
-        listContainer.empty();
+        
+        // 使用更具体的原生选择器，确保在面板内部查找
+        const listContainer = document.querySelector('#cte-map-panel #cte-participant-list');
+        if (!listContainer) {
+            console.error("[CTE Map] Participant list container not found.");
+            return;
+        }
+        
+        listContainer.innerHTML = '';
         
         window.CTEMap.availableParticipants.forEach((name, index) => {
             const id = `participant-${index}`;
             const checked = name === '{{user}}' ? 'checked' : '';
             const displayLabel = name === '{{user}}' ? '你 (User)' : name;
-            const html = `<div class="participant-item"><input type="checkbox" id="${id}" value="${name}" class="cte-checkbox" ${checked}><label for="${id}">${displayLabel}</label></div>`;
-            listContainer.append(html);
+            
+            const div = document.createElement('div');
+            div.className = 'participant-item';
+            div.innerHTML = `<input type="checkbox" id="${id}" value="${name}" class="cte-checkbox" ${checked}><label for="${id}">${displayLabel}</label>`;
+            
+            // 点击 div 也能触发 checkbox
+            div.onclick = function(e) {
+                if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'LABEL') {
+                    const cb = this.querySelector('input');
+                    if(cb) cb.checked = !cb.checked;
+                }
+            };
+            
+            listContainer.appendChild(div);
         });
         
-        $('#participant-custom').val('');
-        const overlay = $('#cte-overlay');
-        if(overlay.length) overlay.show();
-        $('#cte-participant-popup').show();
+        const customInput = document.querySelector('#cte-map-panel #participant-custom');
+        if (customInput) customInput.value = '';
+        
+        const overlay = document.querySelector('#cte-map-panel #cte-overlay');
+        const popup = document.querySelector('#cte-map-panel #cte-participant-popup');
+        
+        if(overlay) overlay.style.display = 'block';
+        if(popup) popup.style.display = 'block';
     };
 
     window.CTEMap.proceedToLocationSelection = function() {
         const selected = [];
-        $('.cte-checkbox:checked').each(function() { selected.push($(this).val()); });
-        const custom = $('#participant-custom').val().trim();
+        // 使用原生查询替代 jQuery
+        const checkboxes = document.querySelectorAll('#cte-map-panel #cte-participant-list .cte-checkbox:checked');
+        checkboxes.forEach(cb => selected.push(cb.value));
+        
+        const customInput = document.querySelector('#cte-map-panel #participant-custom');
+        const custom = customInput ? customInput.value.trim() : '';
         if (custom) selected.push(custom);
+        
         if (selected.length === 0) { alert("请至少选择一位参与者！"); return; }
 
         window.CTEMap.closeAllPopups();

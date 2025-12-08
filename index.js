@@ -143,16 +143,29 @@
         return null;
     };
 
-    // 2.1 扫描 RPG 状态
+    // 2.1 扫描 RPG 状态 (纯渲染)
     window.CTEIdolManager.scanForRPGStats = function() {
         if (window.CTEIdolManager.RPG && window.CTEIdolManager.RPG.state) {
             const fundsEl = document.querySelector('#cte-idol-map-panel #cte-idol-rpg-val-funds');
             const fansEl = document.querySelector('#cte-idol-map-panel #cte-idol-rpg-val-fans');
             const moraleEl = document.querySelector('#cte-idol-map-panel #cte-idol-rpg-val-morale');
 
-            if (fundsEl) fundsEl.innerText = window.CTEIdolManager.RPG.state.funds.toLocaleString();
-            if (fansEl) fansEl.innerText = window.CTEIdolManager.RPG.state.fans.toLocaleString();
-            if (moraleEl) moraleEl.innerText = window.CTEIdolManager.RPG.state.morale;
+            // 资金
+            if (fundsEl) {
+                const val = window.CTEIdolManager.RPG.state.funds;
+                fundsEl.innerText = (typeof val === 'number') ? val.toLocaleString() : val;
+            }
+
+            // 粉丝
+            if (fansEl) {
+                const val = window.CTEIdolManager.RPG.state.fans;
+                fansEl.innerText = (typeof val === 'number') ? val.toLocaleString() : val;
+            }
+
+            // 团魂
+            if (moraleEl) {
+                moraleEl.innerText = window.CTEIdolManager.RPG.state.morale;
+            }
         }
     };
 
@@ -192,7 +205,7 @@
         }
     };
 
-    // [修改] 读取 MVU (stat_data) 包括 Future Log 和 Active Tasks
+    // [修改] 读取 MVU (stat_data) 并解析
     window.CTEIdolManager.readStatsFromMVU = function() {
         let ST = window.SillyTavern;
         if (!ST && window.parent) ST = window.parent.SillyTavern;
@@ -231,22 +244,43 @@
             try {
                 const statData = typeof statDataRaw === 'string' ? JSON.parse(statDataRaw) : statDataRaw;
                 
-                // [新增] 读取全局资产与日志
-                if (statData.funds) window.CTEIdolManager.RPG.state.funds = parseInt(statData.funds);
-                if (statData.assets) window.CTEIdolManager.RPG.state.funds = parseInt(statData.assets); // 兼容字段
-                
-                if (statData.future_log) {
-                    window.CTEIdolManager.RPG.state.futureLog = Array.isArray(statData.future_log) 
-                        ? statData.future_log 
-                        : [statData.future_log];
-                }
-                
-                if (statData.active_tasks) {
-                    window.CTEIdolManager.RPG.state.activeTasks = Array.isArray(statData.active_tasks) 
-                        ? statData.active_tasks 
-                        : [statData.active_tasks];
+                // --- 1. 解析经营组数据 (Management['CTE经营组']) ---
+                if (statData.Management && statData.Management['CTE经营组']) {
+                    const cteGroup = statData.Management['CTE经营组'];
+
+                    // 资金: 去除逗号转整数
+                    if (cteGroup['资金'] !== undefined) {
+                        const fundsStr = String(cteGroup['资金']).replace(/,/g, '');
+                        window.CTEIdolManager.RPG.state.funds = parseInt(fundsStr, 10) || 0;
+                    }
+
+                    // 粉丝: 去除逗号转整数
+                    if (cteGroup['粉丝'] !== undefined) {
+                        const fansStr = String(cteGroup['粉丝']).replace(/,/g, '');
+                        window.CTEIdolManager.RPG.state.fans = parseInt(fansStr, 10) || 0;
+                    }
+
+                    // 团魂
+                    if (cteGroup['团魂']) {
+                        window.CTEIdolManager.RPG.state.morale = cteGroup['团魂'];
+                    }
+
+                    // 待办事项 (futureLog)
+                    if (cteGroup['待办']) {
+                        window.CTEIdolManager.RPG.state.futureLog = Array.isArray(cteGroup['待办']) 
+                            ? cteGroup['待办'] 
+                            : [cteGroup['待办']];
+                    }
+
+                    // 现有通告 (activeTasks)
+                    if (cteGroup['现有通告']) {
+                        window.CTEIdolManager.RPG.state.activeTasks = Array.isArray(cteGroup['现有通告']) 
+                            ? cteGroup['现有通告'] 
+                            : [cteGroup['现有通告']];
+                    }
                 }
 
+                // --- 2. 解析角色数据 (MainCharacters) ---
                 if (statData && statData.MainCharacters) {
                     for (const [name, profile] of Object.entries(window.CTEIdolManager.characterProfiles)) {
                         if (name === '你') continue;
@@ -262,6 +296,10 @@
                         }
                     }
                 }
+
+                // 刷新 UI 显示
+                window.CTEIdolManager.scanForRPGStats();
+
             } catch (e) {
                 console.error("[CTE Idol Map] Failed to parse stat_data:", e);
             }

@@ -1190,7 +1190,7 @@
 }
 
 /* ==========================================================================
-   [NEW] ARCHIVE OVERVIEW CARD STYLE
+   [NEW] ARCHIVE OVERVIEW CARD STYLE (DASHBOARD)
    ========================================================================== */
 .cte-archive-card {
     background-color: #f9f9f7;
@@ -1426,43 +1426,261 @@
 }
 
 /* ==========================================================================
-   [FIX] Archive Card Scrolling & Style Isolation
+   [NEW] AGENCY CONTRACTS MANAGER (INTEGRATED FROM JSON)
    ========================================================================== */
-
-/* 1. 强制移除卡片内所有元素的文字阴影 */
-.cte-archive-card,
-.cte-archive-card * {
-    text-shadow: none !important; /* 使用 !important 覆盖 SillyTavern 的全局深色主题阴影 */
+/* Scoped variables for Agency Section to avoid global pollution */
+.cte-agency-scope {
+    --cte-agency-bg-body: transparent; 
+    --cte-agency-bg-card: #f9f9f7;
+    --cte-agency-text-primary: #1a1a1a;
+    --cte-agency-text-secondary: #555555;
+    --cte-agency-text-muted: #888888;
+    --cte-agency-accent-red: #a84444;      /* Music */
+    --cte-agency-accent-blue: #4a6fa5;     /* Movie */
+    --cte-agency-accent-gold: #b08d55;     /* Ad */
+    --cte-agency-accent-purple: #7d5ba6;   /* Stage */
+    --cte-agency-accent-green: #568b62;    /* Variety */
+    --cte-agency-bg-tag: #e8e8e6;
+    --cte-agency-line-color: #e0e0e0;
+    --cte-agency-stamp-color: #c0392b;
 }
 
-/* 2. 启用垂直滚动并美化滚动条 */
-.cte-archive-card {
-    /* ...原有样式 (保持 width, height, background 等)... */
-    
-    /* 启用垂直滚动 */
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    
-    /* 优化内边距，防止内容紧贴滚动条 */
-    padding-right: 24px; /* 根据原有 padding 微调 */
+.cte-agency-container {
+    font-family: 'Inter', sans-serif;
+    color: var(--cte-agency-text-primary);
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
 }
 
-/* 3. 滚动条美化 (适配浅色纸张背景) */
-.cte-archive-card::-webkit-scrollbar {
-    width: 6px;
+/* Use existing archive card styles but ensure fit */
+.cte-agency-card {
+    background-color: var(--cte-agency-bg-card);
+    width: 100%;
+    max-width: 600px;
+    height: 100%;
+    padding: 20px 25px;
+    border-radius: 4px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
-.cte-archive-card::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.05); /* 极淡的灰色轨道 */
-    border-radius: 3px;
+.cte-agency-header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 15px; border-bottom: 4px solid var(--cte-agency-text-primary);
+    padding-bottom: 10px;
+    flex-shrink: 0;
+}
+.cte-agency-header h1 {
+    font-family: 'Noto Serif SC', serif; font-weight: 700; font-size: 24px;
+    line-height: 1; margin: 0; color: #1a1a1a;
+}
+.cte-agency-meta {
+    text-align: right; font-family: 'Inter', monospace; font-size: 10px; color: var(--cte-agency-text-secondary);
 }
 
-.cte-archive-card::-webkit-scrollbar-thumb {
-    background-color: #d1d1d1; /* 浅灰色滑块 */
-    border-radius: 3px;
-    border: 1px solid #f9f9f7; /* 增加一点描边使其与背景融合 */
+.cte-agency-resource-bar {
+    display: flex; justify-content: center; 
+    background: #eee; padding: 8px 12px; border-radius: 2px;
+    margin-bottom: 15px; 
+    font-family: 'Noto Serif SC', serif;
+    flex-shrink: 0;
+}
+.cte-agency-res-item { display: flex; align-items: baseline; gap: 8px; }
+.cte-agency-res-icon { color: var(--cte-agency-text-muted); font-size: 12px; }
+.cte-agency-res-label { font-size: 14px; font-weight: 600; color: var(--cte-agency-text-secondary); }
+.cte-agency-res-val { 
+    font-weight: 700; color: var(--cte-agency-text-primary); font-size: 18px; 
+    font-family: 'Noto Serif SC', serif; 
 }
 
-.cte-archive-card::-webkit-scrollbar-thumb:hover {
-    background-color: #b0b0b0;
+/* Tabs */
+.cte-agency-tabs {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; 
+    padding-bottom: 0; flex-shrink: 0;
+}
+.cte-agency-tab-btn {
+    background: transparent; border: 1px solid var(--cte-agency-line-color);
+    padding: 6px 12px; border-radius: 20px;
+    font-size: 10px; text-transform: uppercase; color: var(--cte-agency-text-secondary);
+    cursor: pointer; white-space: nowrap; transition: all 0.2s;
+    font-weight: 600; flex: 0 0 auto;
+}
+.cte-agency-tab-btn.active {
+    background: var(--cte-agency-text-primary); color: #fff; border-color: var(--cte-agency-text-primary);
+}
+.cte-agency-tab-btn:hover:not(.active) { border-color: var(--cte-agency-text-secondary); background-color: #f0f0f0; }
+
+/* Contracts List */
+.cte-agency-list {
+    flex: 1; overflow-y: auto; padding-right: 4px;
+    display: flex; flex-direction: column; gap: 12px;
+}
+.cte-agency-list::-webkit-scrollbar { width: 4px; }
+.cte-agency-list::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+
+.cte-agency-empty {
+    text-align: center; color: var(--cte-agency-text-muted); font-size: 12px; margin-top: 40px;
+    font-family: 'Noto Serif SC', serif; font-style: italic;
+}
+
+/* Contract Item Card */
+.cte-agency-item {
+    border: 1px solid var(--cte-agency-line-color);
+    background: #fff;
+    padding: 12px;
+    position: relative;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent; 
+    display: block; 
+    color: #333;
+}
+.cte-agency-item.hidden { display: none; }
+.cte-agency-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    border-color: #ccc;
+}
+
+/* Type Colors */
+.cte-type-movie { border-left-color: var(--cte-agency-accent-blue); }
+.cte-type-music { border-left-color: var(--cte-agency-accent-red); }
+.cte-type-stage { border-left-color: var(--cte-agency-accent-purple); }
+.cte-type-variety { border-left-color: var(--cte-agency-accent-green); }
+.cte-type-ad { border-left-color: var(--cte-agency-accent-gold); }
+
+/* Item Header */
+.cte-item-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 8px;
+}
+.cte-item-title-group h3 {
+    font-family: 'Noto Serif SC', serif; font-size: 15px; font-weight: 700;
+    margin: 0 0 2px 0; line-height: 1.2; color: #222;
+}
+.cte-item-company { font-size: 10px; color: var(--cte-agency-text-muted); text-transform: uppercase; margin-top: 2px;}
+
+.cte-item-badge {
+    font-size: 9px; padding: 2px 6px; border-radius: 2px; font-weight: 600; text-transform: uppercase;
+    white-space: nowrap; margin-left: 8px; flex-shrink: 0;
+}
+.cte-badge-movie { background: #e3ecf5; color: var(--cte-agency-accent-blue); }
+.cte-badge-music { background: #f5e3e3; color: var(--cte-agency-accent-red); }
+.cte-badge-stage { background: #f3eafa; color: var(--cte-agency-accent-purple); }
+.cte-badge-variety { background: #eaf7ed; color: var(--cte-agency-accent-green); }
+.cte-badge-ad { background: #f5f0e3; color: #8a6d3b; }
+
+/* Item Requirements Grid */
+.cte-item-req-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px;
+    margin-bottom: 8px; background: #fafafa; padding: 8px; border-radius: 2px;
+}
+.cte-item-req-row {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10px;
+}
+.cte-item-req-label { color: var(--cte-agency-text-secondary); }
+.cte-item-req-val { font-family: 'Inter', monospace; font-weight: 600; }
+.cte-item-req-val.danger { color: var(--cte-agency-accent-red); }
+
+/* Item Footer */
+.cte-item-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 10px; border-top: 1px dashed #eee; padding-top: 8px;
+}
+.cte-item-payment { font-weight: 700; color: var(--cte-agency-text-primary); font-size: 11px;}
+.cte-item-days { color: var(--cte-agency-text-secondary); margin-top: 1px; }
+
+/* Sign Button */
+.cte-item-sign-btn {
+    background: transparent; border: 1px solid var(--cte-agency-text-primary);
+    color: var(--cte-agency-text-primary); padding: 4px 10px; font-size: 10px;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+    text-transform: uppercase; letter-spacing: 0.5px;
+}
+.cte-item-sign-btn:hover { background: var(--cte-agency-text-primary); color: #fff; }
+
+/* Signed Stamp */
+.cte-item-stamp {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg) scale(1.5);
+    border: 3px double var(--cte-agency-stamp-color);
+    color: var(--cte-agency-stamp-color);
+    padding: 5px 10px;
+    font-family: 'Inter', sans-serif; font-weight: 900; font-size: 24px;
+    text-transform: uppercase; letter-spacing: 2px;
+    opacity: 0; pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.8);
+    mix-blend-mode: multiply;
+}
+.cte-agency-item.signed .cte-item-stamp {
+    opacity: 1; transform: translate(-50%, -50%) rotate(-15deg) scale(1);
+}
+.cte-agency-item.signed { opacity: 0.7; pointer-events: none; filter: grayscale(0.5); }
+
+/* Agency Modal */
+.cte-agency-modal-overlay {
+    position: absolute; 
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 100;
+    display: none; justify-content: center; align-items: center;
+    backdrop-filter: blur(2px);
+}
+.cte-agency-modal-overlay.active { display: flex; }
+
+.cte-agency-modal-content {
+    background: #f9f9f7;
+    padding: 20px;
+    border-radius: 8px;
+    width: 85%;
+    max-width: 320px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    text-align: center;
+    border: 1px solid #ccc;
+    color: #333;
+}
+.cte-agency-modal-title {
+    font-family: 'Noto Serif SC', serif; font-weight: 700; font-size: 16px;
+    color: var(--cte-agency-text-primary); margin-bottom: 4px;
+}
+.cte-agency-modal-subtitle {
+    font-size: 10px; color: var(--cte-agency-text-secondary); margin-bottom: 15px;
+}
+.cte-agency-member-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+}
+.cte-agency-select-btn {
+    background: #fff; border: 1px solid #ddd;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+    color: var(--cte-agency-text-secondary);
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+}
+.cte-agency-select-btn:hover {
+    background: var(--cte-agency-text-primary); color: #fff; border-color: var(--cte-agency-text-primary);
+}
+.cte-agency-select-btn.full-width {
+    grid-column: span 2;
+    background: #eee; font-weight: 600; color: var(--cte-agency-text-primary);
+}
+.cte-agency-select-btn.full-width:hover {
+    background: var(--cte-agency-accent-red); border-color: var(--cte-agency-accent-red); color: #fff;
+}
+.cte-agency-close-btn {
+    margin-top: 15px;
+    background: transparent; border: none;
+    text-decoration: underline; font-size: 10px;
+    color: var(--cte-agency-text-muted); cursor: pointer;
 }

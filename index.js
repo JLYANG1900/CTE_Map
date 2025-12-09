@@ -19,8 +19,8 @@
             funds: 2450000,
             fans: 824000,
             morale: "High",
-            futureLog: [], // 新增
-            activeTasks: [] // 新增
+            futureLog: [],
+            activeTasks: [] 
         }
     };
 
@@ -121,12 +121,22 @@
             'variety': { css: 'cte-type-variety', badge: 'cte-badge-variety', label: 'Variety' },
             'ad': { css: 'cte-type-ad', badge: 'cte-badge-ad', label: 'Ad' }
         },
+        
+        // Memo Type Config
+        MEMO_TYPE_CONFIG: {
+            'movie': { css: 'cte-memo-type-movie', bg: 'cte-memo-bg-movie', fill: 'cte-memo-fill-movie', label: 'Movie/TV' },
+            'music': { css: 'cte-memo-type-music', bg: 'cte-memo-bg-music', fill: 'cte-memo-fill-music', label: 'Music' },
+            'variety': { css: 'cte-memo-type-variety', bg: 'cte-memo-bg-variety', fill: 'cte-memo-fill-variety', label: 'Variety' },
+            'ad': { css: 'cte-memo-type-ad', bg: 'cte-memo-bg-ad', fill: 'cte-memo-fill-ad', label: 'AD' },
+            'stage': { css: 'cte-memo-type-stage', bg: 'cte-memo-bg-stage', fill: 'cte-memo-fill-stage', label: 'Stage' },
+            'group': { css: 'cte-memo-type-group', bg: 'cte-memo-bg-group', fill: 'cte-memo-fill-group', label: 'Group' }
+        },
 
         init: function() {
             // No specific init needed, functions called on demand
         },
 
-        // 从聊天记录中提取 <contracts> 块
+        // --- Agency Contract Logic ---
         getContractsContent: function() {
             let context = stContext;
             if (!context && window.SillyTavern) context = window.SillyTavern.getContext();
@@ -147,6 +157,7 @@
             if (text.includes('舞台') || text.includes('stage') || text.includes('打歌') || text.includes('公演') || text.includes('唱跳')) return 'stage';
             if (text.includes('综艺') || text.includes('variety') || text.includes('show') || text.includes('真人秀')) return 'variety';
             if (text.includes('广告') || text.includes('ad') || text.includes('代言') || text.includes('大使')) return 'ad';
+            if (text.includes('组合') || text.includes('group') || text.includes('团')) return 'group';
             return 'movie'; // Default
         },
 
@@ -167,10 +178,9 @@
             return attrs;
         },
 
-        // 渲染单个卡片 HTML
         createCardHTML: function(data, index, rawString) {
             const typeKey = this.detectType(data.type);
-            const style = this.TYPE_CONFIG[typeKey];
+            const style = this.TYPE_CONFIG[typeKey] || this.TYPE_CONFIG['movie'];
             const attrs = this.parseAttributes(data.reqs);
             const attrHtml = attrs.map(a => {
                 const isHigh = parseInt(a.val) > 80; 
@@ -201,7 +211,6 @@
             `;
         },
 
-        // 渲染整个视图
         renderView: function(container) {
             const rawText = this.getContractsContent();
             let listHtml = '';
@@ -211,12 +220,8 @@
             const funds = window.CTEIdolManager.RPG.state.funds.toLocaleString();
 
             if (rawText) {
-                // Remove tags
                 const cleanText = rawText.replace(/<\/?contracts>/g, '');
-                // Regex for [Type|Name|Company|Job|Reqs|Pay|Duration]
-                // Supports both Chinese | and standard |
                 const pattern = /\[(?:通告|Contract)\s*[\|｜]\s*(.*?)\s*[\|｜]\s*(.*?)\s*[\|｜]\s*(.*?)\s*[\|｜]\s*(.*?)\s*[\|｜]\s*(.*?)\s*[\|｜]\s*(.*?)\s*[\|｜]\s*(.*?)\]/g;
-                
                 let match;
                 while ((match = pattern.exec(cleanText)) !== null) {
                     const data = {
@@ -334,6 +339,7 @@
 
         closeModal: function() {
             document.getElementById('cte-agency-sign-modal').classList.remove('active');
+            document.getElementById('cte-memo-manual-modal').classList.remove('active');
             this.pendingCard = null;
             this.pendingRawContract = "";
             const input = document.getElementById('cte-agency-custom-member');
@@ -342,30 +348,12 @@
 
         confirmSign: function(memberName) {
             if (!this.pendingCard || !this.pendingRawContract) return;
-
-            // 1. Visual Feedback
             this.pendingCard.classList.add('signed');
-
-            // 2. Send to SillyTavern
-            // 将 ASCII 管道符 | 替换为全角管道符 ｜，防止被识别为命令分隔符
-            // 同时处理可能存在的双引号，防止参数截断
-            let safeContract = this.pendingRawContract.replace(/\|/g, '｜').replace(/"/g, '\\"');
-
-            const message = `${memberName} 接取通告：${safeContract}`;
-
+            const message = `${memberName} 接取通告：${this.pendingRawContract}`;
             if (stContext) {
-                // 建议加上 try-catch 防止在此处报错中断 UI 逻辑
-                try {
-                    stContext.executeSlashCommandsWithOptions(`/setinput ${message}`);
-                } catch (e) {
-                    console.error("发送指令失败:", e);
-                }
+                stContext.executeSlashCommandsWithOptions(`/setinput ${message}`);
             }
-
-            // 3. Close
             this.closeModal();
-            // Optional: Close the whole panel after action?
-            // window.CTEIdolManager.closeAllPopups();
         },
 
         confirmCustomSign: function() {
@@ -377,6 +365,270 @@
                 input.style.borderColor = '#a84444';
                 setTimeout(() => input.style.borderColor = '#ddd', 500);
             }
+        },
+
+        // --- Active Contracts Memo Logic (New) ---
+
+        getStoryDate: function() {
+            const statusTop = window.CTEIdolManager.getStatusTopContent();
+            if (statusTop) {
+                // Try parsing "YYYY年MM月DD日" or "YYYY/MM/DD"
+                const match = statusTop.match(/(\d{4})[年/-](\d{1,2})[月/-](\d{1,2})[日\s]?/);
+                if (match) {
+                    const year = parseInt(match[1]);
+                    const month = parseInt(match[2]) - 1; 
+                    const day = parseInt(match[3]);
+                    return new Date(year, month, day);
+                }
+            }
+            return new Date(); // Fallback to real today
+        },
+
+        getStoredMemoContracts: function() {
+            try {
+                return JSON.parse(localStorage.getItem('cte_memo_contracts') || '[]');
+            } catch (e) { return []; }
+        },
+
+        saveMemoContract: function(contract) {
+            const list = this.getStoredMemoContracts();
+            list.unshift(contract);
+            localStorage.setItem('cte_memo_contracts', JSON.stringify(list));
+        },
+
+        removeMemoContract: function(id) {
+            if(!confirm("确认结束或删除此通告？")) return;
+            let list = this.getStoredMemoContracts();
+            list = list.filter(c => c.id !== id);
+            localStorage.setItem('cte_memo_contracts', JSON.stringify(list));
+            // Re-render
+            const listContainer = document.getElementById('cte-memo-list-container');
+            if(listContainer) this.renderMemoList(listContainer);
+            this.updateMemoSummary();
+        },
+
+        updateMemoSummary: function() {
+            const list = this.getStoredMemoContracts();
+            const countEl = document.getElementById('cte-memo-sum-count');
+            const totalEl = document.getElementById('cte-memo-sum-total');
+            if(countEl) countEl.innerText = list.length;
+            if(totalEl) totalEl.innerText = list.length;
+        },
+
+        renderMemoCard: function() {
+            const storyDate = this.getStoryDate();
+            const dateStr = `${storyDate.getFullYear()}年${storyDate.getMonth()+1}月${storyDate.getDate()}日`;
+            
+            return `
+                <div class="cte-memo-wrapper">
+                    <div class="cte-memo-card">
+                        <header class="cte-memo-header">
+                            <div class="cte-memo-header-title">
+                                <h1>现有通告备忘录</h1>
+                                <div class="cte-memo-header-subtitle">
+                                    <span>当前故事日期:</span>
+                                    <span class="cte-memo-current-story-date">${dateStr}</span>
+                                </div>
+                            </div>
+                            <div class="cte-memo-header-actions">
+                                <button class="cte-memo-btn-header" onclick="window.CTEIdolManager.Contracts.openMemoModal()">+ 登记通告</button>
+                            </div>
+                        </header>
+
+                        <div class="cte-memo-summary-bar">
+                            <div class="cte-memo-summary-item">
+                                <span class="cte-memo-sum-val" id="cte-memo-sum-count">0</span>
+                                <span class="cte-memo-sum-label">执行中 / ACTIVE</span>
+                            </div>
+                            <div class="cte-memo-summary-item" style="border-left-color: #4a6fa5;">
+                                <span class="cte-memo-sum-val" id="cte-memo-sum-total">0</span>
+                                <span class="cte-memo-sum-label">存档总数</span>
+                            </div>
+                        </div>
+
+                        <div class="cte-memo-list" id="cte-memo-list-container">
+                            <!-- Populated by JS -->
+                        </div>
+                        
+                        <div style="margin-top: 15px; border-top: 2px solid #1a1a1a; padding-top:10px; opacity:0.6; font-size:10px; display:flex; justify-content:space-between;">
+                            <span>SYSTEM: MEMO MODE</span>
+                            <span>SYNCED</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        },
+
+        renderMemoList: function(container) {
+            const list = this.getStoredMemoContracts();
+            const currentStoryTime = this.getStoryDate().getTime();
+            
+            if (list.length === 0) {
+                container.innerHTML = '<div class="cte-memo-empty-state">暂无记录<br>点击右上角登记新通告</div>';
+                return;
+            }
+
+            let html = '';
+            list.forEach(item => {
+                const style = this.MEMO_TYPE_CONFIG[item.type] || this.MEMO_TYPE_CONFIG['movie'];
+                let avatarUrl = 'https://placehold.co/100x100/222/fff?text=CTE';
+                
+                // Try to find avatar
+                const profile = window.CTEIdolManager.characterProfiles[item.relatedMember];
+                if (profile) avatarUrl = profile.image;
+                if (item.type === 'group') avatarUrl = 'https://placehold.co/100x100/333/fff?text=CTE';
+
+                // Progress Calc
+                let progress = 0;
+                if (item.durationDays > 0) {
+                    const elapsedDays = (currentStoryTime - item.startTime) / (1000 * 60 * 60 * 24);
+                    progress = Math.floor((elapsedDays / item.durationDays) * 100);
+                    progress = Math.max(0, Math.min(100, progress));
+                } else {
+                    progress = 5; 
+                }
+                if (progress > 0 && progress < 5) progress = 5;
+
+                html += `
+                <div class="cte-memo-item ${style.css}">
+                    <div class="cte-memo-item-header">
+                        <span class="cte-memo-item-type ${style.bg}">${item.typeLabel}</span>
+                        <span class="cte-memo-item-status">进行中</span>
+                    </div>
+                    <div class="cte-memo-item-body">
+                        <img src="${avatarUrl}" class="cte-memo-member-avatar">
+                        <div class="cte-memo-info">
+                            <div class="cte-memo-title">${item.title}</div>
+                            <div class="cte-memo-company">${item.company}</div>
+                            <span class="cte-memo-role-badge">${item.role}</span>
+                        </div>
+                    </div>
+                    <div class="cte-memo-footer">
+                        <div class="cte-memo-time-row">
+                            <span>时长: ${item.durationStr}</span>
+                            <span>薪酬: ${item.pay}</span>
+                        </div>
+                        <div class="cte-memo-progress-container">
+                            <div class="cte-memo-progress-bar-bg"><div class="cte-memo-progress-bar-fill ${style.fill}" style="width: ${progress}%;"></div></div>
+                            <span class="cte-memo-progress-val">${progress}%</span>
+                        </div>
+                        <div class="cte-memo-card-actions">
+                            <button class="cte-memo-action-btn cte-memo-btn-complete" onclick="window.CTEIdolManager.Contracts.removeMemoContract(${item.id})">完成</button>
+                            <button class="cte-memo-action-btn cte-memo-btn-delete" onclick="window.CTEIdolManager.Contracts.removeMemoContract(${item.id})">删除</button>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+            this.updateMemoSummary();
+        },
+
+        getModalHTML: function() {
+            return `
+            <div class="cte-memo-modal-overlay" id="cte-memo-manual-modal">
+                <div class="cte-memo-modal-box">
+                    <div class="cte-memo-modal-title">登记新通告</div>
+                    <p class="cte-memo-modal-subtitle">请粘贴文本：例如：鹿言 接取通告：[通告｜唱片...｜...]</p>
+                    <textarea class="cte-memo-modal-textarea" id="cte-memo-contract-input" placeholder="例如：鹿言 接取通告：[通告｜唱片 / Music｜冬日恋曲｜索尼音乐｜合作单曲...｜-｜100W｜5天]"></textarea>
+                    
+                    <div class="cte-memo-modal-input-group">
+                        <label>接取日期(故事内):</label>
+                        <input type="date" id="cte-memo-date-input" class="cte-memo-modal-date-input">
+                    </div>
+
+                    <div class="cte-memo-modal-actions">
+                        <button class="cte-memo-modal-btn" onclick="window.CTEIdolManager.Contracts.closeModal()">取消</button>
+                        <button class="cte-memo-modal-btn cte-memo-modal-btn-primary" onclick="window.CTEIdolManager.Contracts.parseAndAddMemo()">确认登记</button>
+                    </div>
+                </div>
+            </div>`;
+        },
+
+        openMemoModal: function() {
+            const modal = document.getElementById('cte-memo-manual-modal');
+            const dateInput = document.getElementById('cte-memo-date-input');
+            const textInput = document.getElementById('cte-memo-contract-input');
+            
+            if (modal) {
+                modal.classList.add('active');
+                if (textInput) textInput.value = '';
+                if (dateInput) {
+                    // Set default to current story date
+                    const d = this.getStoryDate();
+                    // Format YYYY-MM-DD for input[type=date]
+                    const yyyy = d.getFullYear();
+                    const mm = String(d.getMonth() + 1).padStart(2, '0');
+                    const dd = String(d.getDate()).padStart(2, '0');
+                    dateInput.value = `${yyyy}-${mm}-${dd}`;
+                }
+            }
+        },
+
+        parseAndAddMemo: function() {
+            const raw = document.getElementById('cte-memo-contract-input').value.trim();
+            const dateVal = document.getElementById('cte-memo-date-input').value;
+            if (!raw) return;
+
+            const match = raw.match(/\[(.*?)\]/);
+            if (!match) {
+                alert("未找到标准格式内容，请确保包含 [通告｜...｜...] 结构");
+                return;
+            }
+
+            const cleanStr = match[1];
+            const prefix = raw.substring(0, match.index);
+            
+            // Extract name
+            let extractedName = null;
+            for (const name in window.CTEIdolManager.characterProfiles) {
+                if (prefix.includes(name)) {
+                    extractedName = name;
+                    break;
+                }
+            }
+            if (prefix.includes('全员') || prefix.includes('男团')) extractedName = 'CTE';
+
+            const parts = cleanStr.split(/\||｜/).map(s => s.trim());
+            if (parts.length < 5) {
+                alert("格式无法识别，请检查是否包含完整的分割线 (｜)。");
+                return;
+            }
+
+            let typeKey = 'movie';
+            try {
+                const typePart = parts[1] || '';
+                if (typePart.toLowerCase().includes('music')) typeKey = 'music';
+                else if (typePart.toLowerCase().includes('variety')) typeKey = 'variety';
+                else if (typePart.toLowerCase().includes('ad')) typeKey = 'ad';
+                else if (typePart.toLowerCase().includes('stage')) typeKey = 'stage';
+                else if (typePart.toLowerCase().includes('group') || typePart.toLowerCase().includes('组合')) typeKey = 'group';
+            } catch(e) {}
+
+            const durationStr = parts[7] || '待定';
+            const durationNum = parseInt(durationStr) || 0; 
+            
+            const startDate = dateVal ? new Date(dateVal).getTime() : this.getStoryDate().getTime();
+
+            const newContract = {
+                id: Date.now(),
+                type: typeKey,
+                typeLabel: parts[1] ? parts[1].split('/')[0] : '通告',
+                title: parts[2] || '未知标题',
+                company: parts[3] || '未知公司',
+                role: parts[4] || '未知角色',
+                reqs: parts[5] || '-',
+                pay: parts[6] || '-',
+                durationStr: durationStr,
+                durationDays: durationNum,
+                startTime: startDate, 
+                relatedMember: extractedName
+            };
+
+            this.saveMemoContract(newContract);
+            this.closeModal();
+            // Refresh
+            const container = document.getElementById('cte-memo-list-container');
+            if(container) this.renderMemoList(container);
         }
     };
 
@@ -385,13 +637,11 @@
     // 2. 核心功能函数
     // ==========================================
 
-    // [新增] 2.0 解析 status_top XML 文本
     window.CTEIdolManager.parseStatusTop = function(text) {
         if (!text) return null;
         
         const timeMatch = text.match(/时间[:：]\s*(.*?)(?:\n|$)/);
         const locMatch = text.match(/地点[:：]\s*(.*?)(?:\n|$)/);
-        // 今日安排：匹配到 "最近演出安排" 或 字符串结束
         const todayMatch = text.match(/今日安排[:：]\s*([\s\S]*?)(?=最近演出安排[:：]|$)/);
         const upcomingMatch = text.match(/最近演出安排[:：]\s*([\s\S]*?)(?:\n|$)/);
 
@@ -403,7 +653,6 @@
         };
     };
 
-    // [修改] 获取 status_top 内容的辅助函数
     window.CTEIdolManager.getStatusTopContent = function() {
         let context = stContext;
         if (!context && window.SillyTavern) context = window.SillyTavern.getContext();
@@ -417,38 +666,21 @@
         return null;
     };
 
-    // 2.1 扫描 RPG 状态 (纯渲染)
     window.CTEIdolManager.scanForRPGStats = function() {
         if (window.CTEIdolManager.RPG && window.CTEIdolManager.RPG.state) {
             const fundsEl = document.querySelector('#cte-idol-map-panel #cte-idol-rpg-val-funds');
             const fansEl = document.querySelector('#cte-idol-map-panel #cte-idol-rpg-val-fans');
             const moraleEl = document.querySelector('#cte-idol-map-panel #cte-idol-rpg-val-morale');
 
-            // 资金
-            if (fundsEl) {
-                const val = window.CTEIdolManager.RPG.state.funds;
-                fundsEl.innerText = (typeof val === 'number') ? val.toLocaleString() : val;
-            }
-
-            // 粉丝
-            if (fansEl) {
-                const val = window.CTEIdolManager.RPG.state.fans;
-                fansEl.innerText = (typeof val === 'number') ? val.toLocaleString() : val;
-            }
-
-            // 团魂
-            if (moraleEl) {
-                moraleEl.innerText = window.CTEIdolManager.RPG.state.morale;
-            }
+            if (fundsEl) fundsEl.innerText = window.CTEIdolManager.RPG.state.funds.toLocaleString();
+            if (fansEl) fansEl.innerText = window.CTEIdolManager.RPG.state.fans.toLocaleString();
+            if (moraleEl) moraleEl.innerText = window.CTEIdolManager.RPG.state.morale;
         }
     };
 
-    // 从 status_bottom1 读取角色动态状态
     window.CTEIdolManager.readCharacterStatsFromChat = function() {
         let context = stContext;
-        if (!context && window.SillyTavern) {
-            context = window.SillyTavern.getContext();
-        }
+        if (!context && window.SillyTavern) context = window.SillyTavern.getContext();
         if (!context || !context.chat || context.chat.length === 0) return;
 
         let statusContent = null;
@@ -465,7 +697,6 @@
 
         for (const [name, profile] of Object.entries(window.CTEIdolManager.characterProfiles)) {
             if (name === '你') continue;
-
             const charBlockRegex = new RegExp(`<${name}>([\\s\\S]*?)<\\/${name}>`, 'i');
             const charMatch = statusContent.match(charBlockRegex);
 
@@ -479,7 +710,6 @@
         }
     };
 
-    // [修改] 读取 MVU (stat_data) 并解析
     window.CTEIdolManager.readStatsFromMVU = function() {
         let ST = window.SillyTavern;
         if (!ST && window.parent) ST = window.parent.SillyTavern;
@@ -518,43 +748,21 @@
             try {
                 const statData = typeof statDataRaw === 'string' ? JSON.parse(statDataRaw) : statDataRaw;
                 
-                // --- 1. 解析经营组数据 (Management['CTE经营组']) ---
                 if (statData.Management && statData.Management['CTE经营组']) {
                     const cteGroup = statData.Management['CTE经营组'];
-
-                    // 资金: 去除逗号转整数
                     if (cteGroup['资金'] !== undefined) {
                         const fundsStr = String(cteGroup['资金']).replace(/,/g, '');
                         window.CTEIdolManager.RPG.state.funds = parseInt(fundsStr, 10) || 0;
                     }
-
-                    // 粉丝: 去除逗号转整数
                     if (cteGroup['粉丝'] !== undefined) {
                         const fansStr = String(cteGroup['粉丝']).replace(/,/g, '');
                         window.CTEIdolManager.RPG.state.fans = parseInt(fansStr, 10) || 0;
                     }
-
-                    // 团魂
-                    if (cteGroup['团魂']) {
-                        window.CTEIdolManager.RPG.state.morale = cteGroup['团魂'];
-                    }
-
-                    // 待办事项 (futureLog)
-                    if (cteGroup['待办']) {
-                        window.CTEIdolManager.RPG.state.futureLog = Array.isArray(cteGroup['待办']) 
-                            ? cteGroup['待办'] 
-                            : [cteGroup['待办']];
-                    }
-
-                    // 现有通告 (activeTasks)
-                    if (cteGroup['现有通告']) {
-                        window.CTEIdolManager.RPG.state.activeTasks = Array.isArray(cteGroup['现有通告']) 
-                            ? cteGroup['现有通告'] 
-                            : [cteGroup['现有通告']];
-                    }
+                    if (cteGroup['团魂']) window.CTEIdolManager.RPG.state.morale = cteGroup['团魂'];
+                    if (cteGroup['待办']) window.CTEIdolManager.RPG.state.futureLog = Array.isArray(cteGroup['待办']) ? cteGroup['待办'] : [cteGroup['待办']];
+                    if (cteGroup['现有通告']) window.CTEIdolManager.RPG.state.activeTasks = Array.isArray(cteGroup['现有通告']) ? cteGroup['现有通告'] : [cteGroup['现有通告']];
                 }
 
-                // --- 2. 解析角色数据 (MainCharacters) ---
                 if (statData && statData.MainCharacters) {
                     for (const [name, profile] of Object.entries(window.CTEIdolManager.characterProfiles)) {
                         if (name === '你') continue;
@@ -570,17 +778,13 @@
                         }
                     }
                 }
-
-                // 刷新 UI 显示
                 window.CTEIdolManager.scanForRPGStats();
-
             } catch (e) {
                 console.error("[CTE Idol Map] Failed to parse stat_data:", e);
             }
         }
     };
 
-    // 2.2 渲染事务所内容 (Dashboard updated with Archive Card)
     window.CTEIdolManager.renderRPGContent = function(viewType) {
         const container = document.querySelector('#cte-idol-map-panel #cte-idol-rpg-content-area');
         
@@ -596,10 +800,8 @@
                 htmlContent += '<div class="cte-idol-rpg-roster-grid">';
                 for (const [name, profile] of Object.entries(window.CTEIdolManager.characterProfiles)) {
                     if (name === '你') continue;
-                    
                     const roleText = (profile.role && typeof profile.role === 'string') ? profile.role.split('、')[0] : '成员';
                     const stats = profile.rpgStats || { vocal: 0, dance: 0, eloquence: 0, acting: 0 };
-                    
                     let warningHtml = '';
                     if (profile.status && profile.status.desire > 80) {
                         warningHtml = `<div class="cte-idol-rpg-warning-box"><span><i class="fa-solid fa-triangle-exclamation"></i> 欲望值过高</span><button class="cte-idol-heartbeat-shortcut" onclick="window.CTEIdolManager.switchView('heartbeat')"><i class="fa-solid fa-heart"></i></button></div>`;
@@ -614,7 +816,6 @@
                                     <div style="color:#fff; font-weight:bold; font-size:14px;">${name}</div>
                                     <div style="font-size:10px; color:#888;">${profile.personality}</div>
                                 </div>
-                                
                                 <div class="cte-idol-rpg-stat-row">
                                     <div class="cte-idol-rpg-stat-bar-container">
                                         <div class="label" style="display:flex; justify-content:space-between;"><span>歌艺</span> <span>${stats.vocal}</span></div>
@@ -654,11 +855,10 @@
                 container.innerHTML = htmlContent;
 
             } else if (viewType === 'agency') {
-                // 调用新的通告管理模块渲染
                 window.CTEIdolManager.Contracts.renderView(container);
             } else {
                 // ==========================
-                // Dashboard (Archive Card)
+                // Dashboard
                 // ==========================
                 const statusTopRaw = window.CTEIdolManager.getStatusTopContent();
                 const parsedStatus = window.CTEIdolManager.parseStatusTop(statusTopRaw) || {
@@ -668,14 +868,12 @@
                     upcoming: '待定'
                 };
 
-                // Split Date string if possible (e.g. "2025年1月22日 | 星期五 | 06:30 | 训练日")
                 let timeBadge = '';
                 let dateParts = parsedStatus.dateStr.split('|');
                 if (dateParts.length >= 3) timeBadge = dateParts[2].trim();
 
                 const funds = window.CTEIdolManager.RPG.state.funds.toLocaleString();
                 
-                // Generate Lists
                 const futureLogHtml = window.CTEIdolManager.RPG.state.futureLog.length > 0 
                     ? window.CTEIdolManager.RPG.state.futureLog.map(item => `
                         <li class="cte-archive-dossier-item">
@@ -692,9 +890,12 @@
                         </li>`).join('')
                     : `<li class="cte-archive-dossier-item"><div class="cte-archive-item-content" style="color:#999">暂无进行中任务</div></li>`;
 
+                // [UPDATED] Right side: Active Contracts Memo
+                const rightColHtml = window.CTEIdolManager.Contracts.renderMemoCard();
+
                 htmlContent = `
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; height:100%;">
-                        <!-- Left: Archive Card (Replaces Recent Announcements) -->
+                        <!-- Left: Archive Card -->
                         <div class="cte-archive-card">
                             <div class="cte-archive-card-content">
                                 <header>
@@ -756,16 +957,22 @@
                             </div>
                         </div>
 
-                        <!-- Right: Stats & Score (Existing) -->
-                        <div class="cte-idol-rpg-card" style="display:flex; align-items:center; justify-content:center;">
-                            <div style="text-align:center;">
-                                <div style="font-size:32px; color:#c5a065; font-weight:bold;">S+</div>
-                                <div style="font-size:12px; color:#666;">综合评价</div>
-                            </div>
-                        </div>
+                        <!-- Right: Active Contracts Memo -->
+                        ${rightColHtml}
                     </div>
+                    
+                    <!-- Inject Modal for Memo -->
+                    ${window.CTEIdolManager.Contracts.getModalHTML()}
                 `;
                 container.innerHTML = htmlContent;
+
+                // Populate the list after insertion
+                setTimeout(() => {
+                    const listContainer = document.getElementById('cte-memo-list-container');
+                    if (listContainer) {
+                        window.CTEIdolManager.Contracts.renderMemoList(listContainer);
+                    }
+                }, 50);
             }
 
         } catch (e) {
@@ -774,11 +981,9 @@
         }
     };
 
-    // 2.3 渲染 Heartbeat 界面
     window.CTEIdolManager.Heartbeat.renderGrid = function() {
         const container = document.querySelector('#cte-idol-map-panel #cte-idol-hb-activity-grid');
         if (!container) return;
-        
         let html = '';
         try {
             window.CTEIdolManager.Heartbeat.activities.forEach(act => {
@@ -801,7 +1006,6 @@
         window.CTEIdolManager.Heartbeat.currentActivity = actName;
         const list = document.getElementById('cte-idol-hb-member-list');
         if (!list) return;
-        
         let html = '';
         for (const [name, profile] of Object.entries(window.CTEIdolManager.characterProfiles)) {
             if (name === '你') continue;
@@ -825,15 +1029,12 @@
         $('.cte-idol-hb-member-item.selected').each(function() {
             selected.push($(this).find('.cte-idol-hb-member-name').text());
         });
-        
         if (selected.length === 0) {
             alert("请至少选择一名成员！");
             return;
         }
-        
         const activity = window.CTEIdolManager.Heartbeat.currentActivity;
         const text = `{{user}} 决定与 ${selected.join('、')} 做爱：${activity}。`;
-        
         if (stContext) {
             stContext.executeSlashCommandsWithOptions(`/setinput ${text}`);
             window.CTEIdolManager.closeAllPopups();
@@ -842,11 +1043,8 @@
         }
     };
 
-    // 2.4 视图切换
     window.CTEIdolManager.switchView = function(viewName, btn) {
         console.log("[CTE Idol Map] Switching to view:", viewName);
-        
-        // 更新导航按钮状态
         const panel = document.getElementById('cte-idol-map-panel');
         if(panel) {
             const btns = panel.querySelectorAll('.cte-idol-nav-btn');
@@ -854,14 +1052,12 @@
             if (btn) btn.classList.add('active');
             else if (viewName === 'map' && btns[0]) btns[0].classList.add('active');
             
-            // 切换视图显示
             const views = panel.querySelectorAll('.cte-idol-view');
             views.forEach(v => v.classList.remove('active'));
             const targetView = panel.querySelector(`#cte-idol-view-${viewName}`);
             if (targetView) targetView.classList.add('active');
         }
 
-        // 调用对应渲染逻辑
         try {
             if (viewName === 'schedule') {
                 window.CTEIdolManager.refreshSchedule();
@@ -880,7 +1076,6 @@
         }
     };
 
-
     // ==========================================
     // 3. 初始化加载逻辑
     // ==========================================
@@ -894,7 +1089,6 @@
     }, 500);
 
     function bindRPGEvents() {
-        // 使用事件委托
         $(document).off('click', '.cte-idol-rpg-nav-btn').on('click', '.cte-idol-rpg-nav-btn', function() {
             $('.cte-idol-rpg-nav-btn').removeClass('active');
             $(this).addClass('active');
@@ -946,7 +1140,6 @@
     async function initializeExtension() {
         console.log("[CTE Idol Map] Initializing Extension...");
 
-        // 彻底清理旧的 DOM 元素
         document.querySelectorAll('#cte-idol-map-panel, #cte-idol-toggle-btn').forEach(el => el.remove());
         document.querySelectorAll('link[href*="CTE_Map/style.css"]').forEach(el => el.remove());
 
@@ -982,18 +1175,15 @@
             if (!response.ok) throw new Error("Map file not found");
             const htmlContent = await response.text();
             
-            // 注入 HTML 内容
             const contentArea = document.getElementById('cte-idol-content-area');
             if(contentArea) contentArea.innerHTML = htmlContent;
             
-            // 初始化各个模块
             bindMapEvents();
             loadSavedPositions();
             loadSavedBg();
             window.CTEIdolManager.initNationalMap();
             window.CTEIdolManager.loadSavedNationalBg();
-            window.CTEIdolManager.Contracts.init(); // Init contracts module
-            
+            window.CTEIdolManager.Contracts.init(); 
             bindRPGEvents();
 
         } catch (e) {
@@ -1002,7 +1192,6 @@
             if(contentArea) contentArea.innerHTML = `<p style="padding:20px; color:white;">无法加载地图文件 (map.html)。<br>错误信息: ${e.message}</p>`;
         }
 
-        // 绑定主面板事件
         let isIconDragging = false;
         $('#cte-idol-toggle-btn').off('click').on('click', (e) => {
             if (isIconDragging) {
@@ -1018,7 +1207,6 @@
                 window.CTEIdolManager.scanForRPGStats();
                 panel.fadeIn(200, function() {
                     fixPanelPosition();
-                    // 检查当前视图并刷新
                     if ($('#cte-idol-view-schedule').hasClass('active')) window.CTEIdolManager.refreshSchedule();
                     if ($('#cte-idol-view-manager').hasClass('active')) {
                         window.CTEIdolManager.readStatsFromMVU();
@@ -1662,5 +1850,4 @@
         window.CTEIdolManager.closeTravelMenu(isTravelMenuVisible);
     };
 
-})(); // End IIFE
-
+})();

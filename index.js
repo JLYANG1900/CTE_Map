@@ -1042,8 +1042,18 @@
             alert("请至少选择一名成员！");
             return;
         }
-        const activity = window.CTEIdolManager.Heartbeat.currentActivity;
-        const text = `{{user}} 决定与 ${selected.join('、')} 做爱：${activity}。`;
+
+        // 1. 获取当前活动名称
+        const activityName = window.CTEIdolManager.Heartbeat.currentActivity;
+
+        // 2. [新增] 在 activities 数组中查找对应的对象以获取 desc
+        const activityObj = window.CTEIdolManager.Heartbeat.activities.find(a => a.name === activityName);
+        const activityDesc = activityObj ? activityObj.desc : ""; // 如果找不到则留空
+
+        // 3. [修改] 将描述拼接到文本中
+        // 格式示例: ...做爱：私人练歌。关上隔音室的门，只有你们两个人的呼吸声。
+        const text = `{{user}} 决定与 ${selected.join('、')} 做爱：${activityName}。${activityDesc}`;
+
         if (stContext) {
             stContext.executeSlashCommandsWithOptions(`/setinput ${text}`);
             window.CTEIdolManager.closeAllPopups();
@@ -1860,4 +1870,5 @@
     };
 
 })();
+
 

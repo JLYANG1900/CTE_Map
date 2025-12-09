@@ -338,10 +338,17 @@
         },
 
         closeModal: function() {
-            document.getElementById('cte-agency-sign-modal').classList.remove('active');
-            document.getElementById('cte-memo-manual-modal').classList.remove('active');
+            // 增加判断：只有当元素存在时才移除 active 类，防止报错
+            const agencyModal = document.getElementById('cte-agency-sign-modal');
+            if (agencyModal) agencyModal.classList.remove('active');
+
+            const memoModal = document.getElementById('cte-memo-manual-modal');
+            if (memoModal) memoModal.classList.remove('active');
+
             this.pendingCard = null;
             this.pendingRawContract = "";
+    
+            // 清理输入框
             const input = document.getElementById('cte-agency-custom-member');
             if(input) input.value = '';
         },
@@ -530,7 +537,7 @@
                     <div class="cte-memo-modal-title">登记新通告</div>
                     <p class="cte-memo-modal-subtitle">请粘贴文本：例如：鹿言 接取通告：[通告｜唱片...｜...]</p>
                     <textarea class="cte-memo-modal-textarea" id="cte-memo-contract-input" placeholder="例如：鹿言 接取通告：[通告｜唱片 / Music｜冬日恋曲｜索尼音乐｜合作单曲...｜-｜100W｜5天]"></textarea>
-                    
+            
                     <div class="cte-memo-modal-input-group">
                         <label>接取日期(故事内):</label>
                         <input type="date" id="cte-memo-date-input" class="cte-memo-modal-date-input">
@@ -538,7 +545,9 @@
 
                     <div class="cte-memo-modal-actions">
                         <button class="cte-memo-modal-btn" onclick="window.CTEIdolManager.Contracts.closeModal()">取消</button>
-                        <button class="cte-memo-modal-btn cte-memo-modal-btn-primary" onclick="window.CTEIdolManager.Contracts.parseAndAddMemo()">确认登记</button>
+                        <button class="cte-memo-modal-btn cte-memo-modal-btn-primary" 
+                                style="background-color: #1a1a1a; color: white; border-color: #1a1a1a;"
+                                onclick="window.CTEIdolManager.Contracts.parseAndAddMemo()">确认登记</button>
                     </div>
                 </div>
             </div>`;
@@ -1851,3 +1860,4 @@
     };
 
 })();
+

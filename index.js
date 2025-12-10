@@ -647,6 +647,9 @@
     window.CTEIdolManager.Shop = {
         items: [],
         pendingItem: null,
+        currentStep: 1, // 1: Buyer, 2: Beneficiary
+        selectedBuyer: null,
+        selectedBeneficiary: null,
         
         CATEGORY_CONFIG: {
             'marketing': { label: 'MARKETING', icon: 'fa-bullhorn', slug: 'marketing' },
@@ -725,7 +728,8 @@
                     effect: effect,
                     priceStr: priceStr,
                     priceVal: priceVal,
-                    stock: stock
+                    stock: stock,
+                    rawLine: line.trim() // Captured full raw line for command output
                 });
             });
         },
@@ -799,7 +803,7 @@
                 <div class="cte-shop-modal-overlay cte-shop-scope" id="cte-shop-modal">
                     <div class="cte-shop-modal-box">
                         <div class="cte-shop-modal-header" style="display:flex; justify-content:space-between; margin-bottom:15px; border-bottom:1px dashed #ccc; padding-bottom:5px;">
-                            <div class="cte-shop-modal-title" style="margin:0;">分配对象 / ASSIGN TO</div>
+                            <div class="cte-shop-modal-title" id="cte-shop-modal-title" style="margin:0;">谁来购买 / WHO BUYS</div>
                             <button class="cte-shop-close-btn" style="width:auto; margin:0;" onclick="window.CTEIdolManager.Shop.closeModal()">x</button>
                         </div>
                         
@@ -826,7 +830,7 @@
                             <input type="text" class="cte-shop-other-input" id="cte-shop-other-input" placeholder="其他 / Other (请填写)" oninput="window.CTEIdolManager.Shop.selectOther(this)">
                         </div>
 
-                        <button class="cte-shop-confirm-btn" id="cte-shop-confirm-btn" onclick="window.CTEIdolManager.Shop.confirmPurchase()">确认下单 / CONFIRM</button>
+                        <button class="cte-shop-confirm-btn" id="cte-shop-confirm-btn" onclick="window.CTEIdolManager.Shop.handleModalButton()">下一步 / NEXT</button>
                     </div>
                 </div>
             `;
@@ -881,61 +885,109 @@
             }
 
             this.pendingItem = item;
+            
+            // Step 1 Reset
+            this.currentStep = 1;
+            this.selectedBuyer = null;
+            this.selectedBeneficiary = null;
+            
+            // Reset UI for Step 1
             document.querySelectorAll('.cte-shop-select-btn').forEach(b => b.classList.remove('selected'));
             document.getElementById('cte-shop-other-input').value = '';
-            document.getElementById('cte-shop-confirm-btn').classList.remove('ready');
+            
+            const titleEl = document.getElementById('cte-shop-modal-title');
+            const btnEl = document.getElementById('cte-shop-confirm-btn');
+            if (titleEl) titleEl.innerText = "谁来购买 / WHO BUYS";
+            if (btnEl) {
+                btnEl.innerText = "下一步 / NEXT";
+                btnEl.classList.remove('ready');
+            }
+
             document.getElementById('cte-shop-modal').classList.add('active');
-            this.selectedBeneficiary = null;
         },
 
         closeModal: function() {
             document.getElementById('cte-shop-modal').classList.remove('active');
             this.pendingItem = null;
+            this.selectedBuyer = null;
             this.selectedBeneficiary = null;
+            this.currentStep = 1;
         },
 
         selectMember: function(el, name) {
             document.querySelectorAll('.cte-shop-select-btn').forEach(btn => btn.classList.remove('selected'));
             document.getElementById('cte-shop-other-input').value = '';
             el.classList.add('selected');
-            this.selectedBeneficiary = name;
+            
+            if (this.currentStep === 1) {
+                this.selectedBuyer = name;
+            } else {
+                this.selectedBeneficiary = name;
+            }
             this.checkConfirmState();
         },
 
         selectOther: function(input) {
             document.querySelectorAll('.cte-shop-select-btn').forEach(btn => btn.classList.remove('selected'));
-            this.selectedBeneficiary = input.value.trim().length > 0 ? input.value : null;
+            const val = input.value.trim().length > 0 ? input.value : null;
+            
+            if (this.currentStep === 1) {
+                this.selectedBuyer = val;
+            } else {
+                this.selectedBeneficiary = val;
+            }
             this.checkConfirmState();
         },
 
         checkConfirmState: function() {
             const btn = document.getElementById('cte-shop-confirm-btn');
-            if (this.selectedBeneficiary) btn.classList.add('ready');
+            // Check if current step has selection
+            const hasSelection = this.currentStep === 1 ? !!this.selectedBuyer : !!this.selectedBeneficiary;
+            
+            if (hasSelection) btn.classList.add('ready');
             else btn.classList.remove('ready');
         },
 
-        confirmPurchase: function() {
-            if (!this.pendingItem || !this.selectedBeneficiary) return;
+        handleModalButton: function() {
+            if (this.currentStep === 1) {
+                if (!this.selectedBuyer) return;
+                
+                // Transition to Step 2
+                this.currentStep = 2;
+                
+                // Reset Selection UI for Step 2
+                document.querySelectorAll('.cte-shop-select-btn').forEach(b => b.classList.remove('selected'));
+                document.getElementById('cte-shop-other-input').value = '';
+                
+                // Update Text
+                const titleEl = document.getElementById('cte-shop-modal-title');
+                const btnEl = document.getElementById('cte-shop-confirm-btn');
+                if (titleEl) titleEl.innerText = "分配对象 / ASSIGN TO";
+                if (btnEl) {
+                    btnEl.innerText = "确认下单 / CONFIRM";
+                    btnEl.classList.remove('ready');
+                }
+            } else {
+                this.finalizePurchase();
+            }
+        },
 
-            // 1. Deduct funds (Client side preview)
-            window.CTEIdolManager.RPG.state.funds -= this.pendingItem.priceVal;
-            
-            // 2. Mark as sold visually
+        finalizePurchase: function() {
+            if (!this.pendingItem || !this.selectedBuyer || !this.selectedBeneficiary) return;
+
+            // 1. Mark as sold visually
             const el = document.getElementById(this.pendingItem.id);
             if(el) el.classList.add('sold');
 
-            // 3. Update funds display
-            const fundsEl = document.querySelector('.cte-shop-res-val');
-            if(fundsEl) fundsEl.innerText = window.CTEIdolManager.RPG.state.funds.toLocaleString();
+            // 2. Send Command with strict Chinese format and rawLine
+            const message = `${this.selectedBuyer} 使用CTE运营资金为 ${this.selectedBeneficiary} 购买了 ${this.pendingItem.rawLine}`;
             
-            // 4. Send command
-            const message = `{{user}} purchased ${this.pendingItem.name} for ${this.selectedBeneficiary} costing ${this.pendingItem.priceStr}.`;
             if (stContext) {
                 stContext.executeSlashCommandsWithOptions(`/setinput ${message}`);
             }
 
             this.closeModal();
-            // Optional: Switch back to dashboard to see RPG stats update (after AI response)
+            // Optional: Switch back to dashboard or update visual state handled by AI response
         }
     };
 

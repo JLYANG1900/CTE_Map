@@ -276,8 +276,8 @@
                         </div>
                         
                         <div style="margin-top: 15px; border-top: 2px solid var(--cte-agency-text-primary); padding-top:10px; opacity:0.6; font-size:10px; display:flex; justify-content:space-between;">
-                            <span>SYSTEM: READY</span>
-                            <span>SECURE CONNECTION</span>
+                            <span>在酒馆输入框中发送"查看通告"</span>
+                            <span>即可刷新</span>
                         </div>
                     </div>
                 </div>
@@ -793,8 +793,8 @@
                         </div>
                         
                         <div style="margin-top: auto; padding-top:10px; opacity:0.6; font-size:9px; display:flex; justify-content:space-between; border-top: 1px solid #ddd;">
-                            <span>CTE PROCUREMENT SYSTEM</span>
-                            <span>SECURE ENCRYPTED</span>
+                            <span>在酒馆输入框中发送"查看商店"</span>
+                            <span>即可刷新</span>
                         </div>
                     </div>
                 </div>
@@ -2223,3 +2223,4 @@
     };
 
 })();
+

@@ -2139,3 +2139,48 @@
     margin-top: 10px; background: transparent; border: none; font-size: 10px; 
     color: var(--cte-shop-text-muted); cursor: pointer; width: 100%; text-decoration: underline;
 }
+
+/* ==========================================================================
+   [NEW] DASHBOARD RESPONSIVE LAYOUT (修复移动端布局)
+   ========================================================================== */
+
+/* 1. 桌面端默认样式 (保持原有的左右并排) */
+.cte-dashboard-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 左右各占一半 */
+    gap: 20px;
+    height: 100%;
+    overflow: hidden; /* 桌面端让卡片内部滚动 */
+}
+
+/* 2. 移动端/窄屏适配 (改为上下纵向排列) */
+@media screen and (max-width: 768px) {
+    .cte-dashboard-layout {
+        display: flex;
+        flex-direction: column; /* 纵向排列 */
+        gap: 20px;
+        height: auto !important; /* 高度自动，允许被内容撑开 */
+        overflow-y: visible;     /* 让父容器滚动，而不是卡片内部滚动 */
+        padding-bottom: 40px;    /* 底部留出一点空间方便手指滑动 */
+    }
+
+    /* 强制让左侧今日概览和右侧备忘录的高度自适应 */
+    .cte-dashboard-layout .cte-archive-card, 
+    .cte-dashboard-layout .cte-memo-wrapper,
+    .cte-dashboard-layout .cte-memo-card {
+        height: auto !important; /* 取消固定高度 */
+        min-height: 450px;       /* 给一个最小高度，保证内容不被压缩太小 */
+        overflow: visible !important; /* 如果内容很长，撑开页面 */
+    }
+
+    /* 修复今日概览内部滚动条冲突 */
+    .cte-archive-card {
+        overflow-y: visible !important; 
+    }
+    
+    /* 修复备忘录列表在移动端的高度 */
+    .cte-memo-list {
+        max-height: 300px; /* 限制列表高度，避免整个页面过长 */
+        overflow-y: auto;  /* 列表内部依然可以滚动 */
+    }
+}

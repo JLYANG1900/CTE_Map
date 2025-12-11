@@ -769,7 +769,7 @@
                                 <h1>CTE 采购中心</h1>
                             </div>
                             <div class="cte-shop-meta">
-                                <div>SYSTEM: V4.0</div>
+                                <div>物价仅供参考</div>
                                 <div>STATUS: ACTIVE</div>
                             </div>
                         </header>
@@ -1526,7 +1526,7 @@
             </div>
             <div id="cte-idol-map-panel" style="display:none;">
                 <div id="cte-idol-drag-handle">
-                    <span>CTE 偶像地图系统</span>
+                    <span>CTE 偶像管理系统</span>
                     <div class="cte-idol-nav-group">
                         <button class="cte-idol-nav-btn active" onclick="window.CTEIdolManager.switchView('map', this)">地图</button>
                         <button class="cte-idol-nav-btn" onclick="window.CTEIdolManager.switchView('schedule', this)">行程</button>
@@ -2222,5 +2222,6 @@
     };
 
 })();
+
 
 

@@ -6,7 +6,8 @@
     transform: translate(-50%, -50%);
     
     /* 默认桌面端样式 */
-    width: 760px;
+    width: 95%;           /* 默认占屏幕宽度的 95% */
+    max-width: 1000px;    /* 最大不超过 1000px，确保能容纳下 950px 的子卡片 */
     height: 85vh;
     max-height: 900px;
     
@@ -2044,7 +2045,7 @@
        1. The "All" button (usually the first one or specific class)
        2. The "Toggle Down" button
     */
-    .cte-shop-tabs:not(.cte-shop-mobile-expanded) .cte-shop-tab-btn:not([data-key="all"]) {
+    .cte-shop-tabs:not(.cte-shop-mobile-expanded) .cte-shop-tab-btn:not([data-key="all"]):not(.cte-shop-tab-toggle) {
         display: none;
     }
 
@@ -2267,3 +2268,4 @@
         overflow-y: auto;  /* 列表内部依然可以滚动 */
     }
 }
+

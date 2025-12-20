@@ -7,6 +7,7 @@
     let stContext = null;
     const DEFAULT_NATIONAL_BG = "https://files.catbox.moe/8z3pnp.png";
 
+    // [FIX] 确保命名空间存在，防止 TypeError
     window.CTEIdolManager = window.CTEIdolManager || {};
 
     // ==========================================
@@ -24,21 +25,180 @@
         }
     };
 
-    // 亲密互动数据
+    // ==========================================
+    // [REFACTORED] Heartbeat 模块 (Netflix Style)
+    // ==========================================
     window.CTEIdolManager.Heartbeat = {
-        activities: [
-            { name: "私人练歌", icon: "fa-microphone", desc: "关上隔音室的门，只有你们两个人的呼吸声。" },
-            { name: "舞蹈特训", icon: "fa-person-running", desc: "贴身指导每一个动作，汗水交织。" },
-            { name: "浴室水蒸气", icon: "fa-shower", desc: "在湿热的雾气中，探索彼此身体的每一寸。" },
-            { name: "深夜卧室", icon: "fa-bed", desc: "用最温柔的方式，陪伴彼此度过漫漫长夜。" },
-            { name: "角色扮演", icon: "fa-masks-theater", desc: "尝试不同的身份，解锁不一样的刺激体验。" },
-            { name: "镜前诱惑", icon: "fa-wand-magic-sparkles", desc: "让他看清自己为你疯狂的模样。" },
-            { name: "专属女仆", icon: "fa-broom", desc: "换上那套特别的服装，提供全方位服务。" },
-            { name: "厨房幻想", icon: "fa-utensils", desc: "在充满烟火气的地方做最疯狂的事。" },
-            { name: "按摩室SPA", icon: "fa-hot-tub-person", desc: "指尖划过肌肤，理智逐渐蒸发。" },
-            { name: "天台夜风", icon: "fa-wind", desc: "城市的霓虹灯在脚下闪烁，我们在风中沉沦。" }
+        // 完整活动数据
+        allActivities: [
+            { name: "办公室的游戏", desc: "在落地窗前，享受一场禁忌的桌上盛宴。", icon: "fa-couch" },
+            { name: "浴室水蒸气", desc: "在湿热的雾气中，探索彼此身体的每一寸。", icon: "fa-shower" },
+            { name: "深夜卧室私语", desc: "用最温柔的方式，陪伴彼此度过漫漫长夜。", icon: "fa-bed" },
+            { name: "角色扮演Play", desc: "尝试不同的身份，解锁不一样的刺激体验。", icon: "fa-masks-theater" },
+            { name: "镜前诱惑", desc: "让他看清自己为你疯狂的模样，是最好的催情剂。", icon: "fa-wand-magic-sparkles" },
+            { name: "专属女仆", desc: "换上女仆装，用羽毛轻轻挑逗他全身。", icon: "fa-broom" },
+            { name: "厨房幻想", desc: "将奶油涂满全身，让他用舌头为你清洁。", icon: "fa-utensils" },
+            { name: "深夜停车场车震", desc: "在狭小的密闭空间里，你只能跨坐在他身上。", icon: "fa-car-side" },
+            { name: "落地窗前", desc: "赤身裸体压在窗前看风景，好像让窗外的景色格外美。", icon: "fa-city" },
+            { name: "电竞桌下口交", desc: "他的手和眼都必须继续游戏哦。", icon: "fa-gamepad" },
+            { name: "校园活动", desc: "和他一起穿上谌绪的高中校服吧！", icon: "fa-graduation-cap" },
+            { name: "健身房的汗水游戏", desc: "好像有人做卧推时没有穿内裤呢……", icon: "fa-dumbbell" },
+            { name: "按摩室SPA混浴", desc: "在氤氲的热气中，肌肤相亲的触感格外清晰。", icon: "fa-hot-tub-person" },
+            { name: "私人影院", desc: "昏暗的灯光下，屏幕上的画面远不如身边的你诱人。", icon: "fa-film" },
+            { name: "试衣间的秘密", desc: "门帘之外是喧嚣的人群，门帘之内是压抑的喘息。", icon: "fa-shirt" },
+            { name: "豪华游艇", desc: "在无边无际的大海上，没有人能听见你的求救。", icon: "fa-ship" },
+            { name: "图书馆角落", desc: "要是被图书管理员听见会怎么样呢？", icon: "fa-book-open" },
+            { name: "摩天轮顶点", desc: "传说在最高点结合的恋人，会永远在一起。", icon: "fa-dharmachakra" },
+            { name: "钢琴上的奏鸣曲", desc: "凌乱的音符，用身体谱写出只属于今夜的乐章。", icon: "fa-music" },
+            { name: "露营帐篷", desc: "森林的虫鸣鸟叫，都成为了这场欢爱的伴奏。", icon: "fa-campground" },
+            { name: "天台的夜风", desc: "城市的霓虹灯在脚下闪烁，我们在风中彻底沉沦。", icon: "fa-wind" },
+            { name: "酒吧后巷", desc: "酒精麻痹了神经，却放大了感官的刺激。", icon: "fa-wine-glass-empty" },
+            { name: "镜中双面", desc: "强迫你在镜前看着自己沉沦的模样，羞耻感爆棚。", icon: "fa-clone" },
+            { name: "丝巾蒙眼", desc: "剥夺了视觉后，每一次触碰都变成了未知的战栗。", icon: "fa-eye-slash" },
+            { name: "精油按摩", desc: "温热的精油滑过肌肤，指尖的游走让理智瞬间蒸发。", icon: "fa-bottle-droplet" },
+            { name: "冰火两重天", desc: "冰块的寒冷与口腔的温热交替，极致的感官刺激。", icon: "fa-temperature-half" },
+            { name: "领带束缚", desc: "那条平时系在颈间的领带，此刻成为了掌控的枷锁。", icon: "fa-user-tie" },
+            { name: "甜蜜盛宴", desc: "蜂蜜涂抹在敏感带上，成为一道待品尝的甜点。", icon: "fa-spoon" },
+            { name: "耳机隔离", desc: "只有对方能听到指令，旁人看来只是一场静默的狂欢。", icon: "fa-headphones" },
+            { name: "高跟鞋女王", desc: "冰冷的鞋跟划过胸膛，让他臣服在你的脚下。", icon: "fa-shoe-prints" },
+            { name: "私房摄影", desc: "镜头记录下每一个淫乱的瞬间，你们是彼此专属的模特。", icon: "fa-camera" },
+            { name: "书房禁地", desc: "在充满墨香的桌案上，进行一场背德的授课。", icon: "fa-book" },
+            { name: "楼梯激情", desc: "利用台阶的高低差，探索前所未有的深入角度。", icon: "fa-stairs" },
+            { name: "红绳束缚", desc: "错综复杂的红绳将对方悬在半空，像一只待宰的羔羊。", icon: "fa-link" },
+            { name: "泳池派对", desc: "水波荡漾掩盖了水下的动作，清凉与燥热的碰撞。", icon: "fa-water" },
+            { name: "私人诊所", desc: "“病人”需要接受全方位的身体检查，尤其是那里。", icon: "fa-user-doctor" },
+            { name: "引擎盖热度", desc: "刚刚熄火的引擎盖还发烫，正如现在的我们。", icon: "fa-fire" },
+            { name: "你的礼物", desc: "除了红色的丝带，你身上一丝不挂，等他拆封。", icon: "fa-gift" },
+            { name: "早安咬", desc: "在晨光中用口舌唤醒他，美好的一天从这里开始。", icon: "fa-sun" },
+            { name: "电车痴汉", desc: "拥挤的车厢里，没人知道我们紧贴的身体间发生了什么。", icon: "fa-train-subway" },
+            { name: "电梯惊魂", desc: "在这几十秒的上升时间里，争分夺秒地索取。", icon: "fa-elevator" },
+            { name: "野外丛林", desc: "远离文明的束缚，回归最原始的野性本能，天为被地为床。", icon: "fa-tree" }
         ],
-        currentActivity: null
+        currentActivity: null,
+        
+        // 模拟 Netflix 分类
+        getRowsData: function() {
+            const total = this.allActivities.length;
+            const third = Math.ceil(total / 3);
+            return {
+                trending: this.allActivities.slice(0, third),
+                intimate: this.allActivities.slice(third, third * 2),
+                public: this.allActivities.slice(third * 2)
+            };
+        },
+
+        // 渲染主视图
+        renderGrid: function() {
+            const data = this.getRowsData();
+            this.renderRow('cte-nf-row1', data.trending);
+            this.renderRow('cte-nf-row2', data.intimate);
+            this.renderRow('cte-nf-row3', data.public);
+        },
+
+        // 渲染单行
+        renderRow: function(containerId, items) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            container.innerHTML = '';
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'cte-nf-card';
+                card.onclick = () => window.CTEIdolManager.Heartbeat.openModal(item.name);
+                
+                card.innerHTML = `
+                    <div class="cte-nf-card-inner">
+                        <div class="cte-nf-card-visual">
+                            <i class="fa-solid ${item.icon}"></i>
+                            <div class="cte-nf-card-overlay">
+                                <div class="cte-nf-card-title">${item.name}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cte-nf-card-details">
+                        <div class="cte-nf-meta-tags">
+                            <span>98% Match</span>
+                            <span class="cte-nf-age-rating">18+</span>
+                            <span>HD</span>
+                        </div>
+                        <div class="cte-nf-card-desc-text">${item.desc}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        },
+
+        // 打开成员选择弹窗
+        openModal: function(activityName) {
+            this.currentActivity = activityName;
+            const grid = document.getElementById('cte-nf-profile-grid');
+            const modal = document.getElementById('cte-nf-modal');
+            
+            if (!grid || !modal) return;
+            grid.innerHTML = '';
+
+            const profiles = window.CTEIdolManager.characterProfiles || {};
+            
+            for (const [name, profile] of Object.entries(profiles)) {
+                if (name === '你') continue;
+                
+                const item = document.createElement('div');
+                item.className = 'cte-nf-profile-item';
+                item.dataset.name = name;
+                item.onclick = () => item.classList.toggle('selected');
+                
+                let bgStyle = profile.image ? `background-image: url('${profile.image}')` : `background-color: #333; display: flex; align-items: center; justify-content: center;`;
+                let innerContent = profile.image ? '' : '<i class="fa-solid fa-user" style="font-size:24px; color:#666;"></i>';
+
+                item.innerHTML = `
+                    <div class="cte-nf-profile-img" style="${bgStyle}">${innerContent}</div>
+                    <div class="cte-nf-profile-name">${name}</div>
+                `;
+                grid.appendChild(item);
+            }
+            modal.style.display = 'flex';
+        },
+
+        closeModal: function() {
+            const modal = document.getElementById('cte-nf-modal');
+            if (modal) modal.style.display = 'none';
+        },
+
+        // 确认生成指令
+        confirmAssignment: function() {
+            const selectedEls = document.querySelectorAll('.cte-nf-profile-item.selected');
+            const selectedNames = Array.from(selectedEls).map(el => el.dataset.name);
+
+            if (selectedNames.length === 0) {
+                alert("Who is watching? Please select at least one member.");
+                return;
+            }
+
+            const actObj = this.allActivities.find(a => a.name === this.currentActivity);
+            const desc = actObj ? actObj.desc : "";
+
+            const text = `{{user}} 决定与 ${selectedNames.join('、')} 做爱：${this.currentActivity}。${desc}`;
+
+            if (typeof stContext !== 'undefined' && stContext) {
+                stContext.executeSlashCommandsWithOptions(`/setinput ${text}`);
+                this.closeModal();
+                
+                // 尝试关闭主面板
+                const panel = document.getElementById('cte-idol-map-panel');
+                if (panel) {
+                    if (typeof $ !== 'undefined') $(panel).fadeOut();
+                    else panel.style.display = 'none';
+                }
+            } else {
+                alert("指令已生成 (模拟): " + text);
+                this.closeModal();
+            }
+        },
+
+        init: function() {
+            this.renderGrid();
+        }
     };
 
     // 合并核心数据
@@ -1554,78 +1714,6 @@
         }
     };
 
-    window.CTEIdolManager.Heartbeat.renderGrid = function() {
-        const container = document.querySelector('#cte-idol-map-panel #cte-idol-hb-activity-grid');
-        if (!container) return;
-        let html = '';
-        try {
-            window.CTEIdolManager.Heartbeat.activities.forEach(act => {
-                html += `
-                    <div class="cte-idol-hb-activity-card">
-                        <div class="cte-idol-hb-activity-icon"><i class="fa-solid ${act.icon}"></i></div>
-                        <div class="cte-idol-hb-activity-name">${act.name}</div>
-                        <div class="cte-idol-hb-activity-desc">${act.desc}</div>
-                        <button class="cte-idol-hb-btn" onclick="window.CTEIdolManager.Heartbeat.openModal('${act.name}')">安排互动</button>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        } catch(e) {
-            console.error("[CTE Idol Map] Error rendering Heartbeat:", e);
-        }
-    };
-
-    window.CTEIdolManager.Heartbeat.openModal = function(actName) {
-        window.CTEIdolManager.Heartbeat.currentActivity = actName;
-        const list = document.getElementById('cte-idol-hb-member-list');
-        if (!list) return;
-        let html = '';
-        for (const [name, profile] of Object.entries(window.CTEIdolManager.characterProfiles)) {
-            if (name === '你') continue;
-            html += `
-                <div class="cte-idol-hb-member-item" onclick="$(this).toggleClass('selected')">
-                    <div class="cte-idol-hb-member-avatar" style="background-image: url('${profile.image}')"></div>
-                    <div class="cte-idol-hb-member-name">${name}</div>
-                </div>
-            `;
-        }
-        list.innerHTML = html;
-        $('#cte-idol-hb-modal').addClass('active');
-    };
-
-    window.CTEIdolManager.Heartbeat.closeModal = function() {
-        $('#cte-idol-hb-modal').removeClass('active');
-    };
-
-    window.CTEIdolManager.Heartbeat.confirmAssignment = function() {
-        const selected = [];
-        $('.cte-idol-hb-member-item.selected').each(function() {
-            selected.push($(this).find('.cte-idol-hb-member-name').text());
-        });
-        if (selected.length === 0) {
-            alert("请至少选择一名成员！");
-            return;
-        }
-
-        // 1. 获取当前活动名称
-        const activityName = window.CTEIdolManager.Heartbeat.currentActivity;
-
-        // 2. [新增] 在 activities 数组中查找对应的对象以获取 desc
-        const activityObj = window.CTEIdolManager.Heartbeat.activities.find(a => a.name === activityName);
-        const activityDesc = activityObj ? activityObj.desc : ""; // 如果找不到则留空
-
-        // 3. [修改] 将描述拼接到文本中
-        // 格式示例: ...做爱：私人练歌。关上隔音室的门，只有你们两个人的呼吸声。
-        const text = `{{user}} 决定与 ${selected.join('、')} 做爱：${activityName}。${activityDesc}`;
-
-        if (stContext) {
-            stContext.executeSlashCommandsWithOptions(`/setinput ${text}`);
-            window.CTEIdolManager.closeAllPopups();
-            window.CTEIdolManager.Heartbeat.closeModal();
-            $('#cte-idol-map-panel').fadeOut();
-        }
-    };
-
     window.CTEIdolManager.switchView = function(viewName, btn) {
         console.log("[CTE Idol Map] Switching to view:", viewName);
         const panel = document.getElementById('cte-idol-map-panel');
@@ -1652,7 +1740,10 @@
                 window.CTEIdolManager.renderRPGContent('dashboard'); 
             }
             if (viewName === 'heartbeat') {
-                window.CTEIdolManager.Heartbeat.renderGrid();
+                // [FIXED] Call the new consolidated method
+                if (window.CTEIdolManager.Heartbeat) {
+                    window.CTEIdolManager.Heartbeat.renderGrid();
+                }
             }
             if (viewName === 'news') {
                 window.CTEIdolManager.renderRPGContent('news');
@@ -1799,7 +1890,9 @@
                         window.CTEIdolManager.readCharacterStatsFromChat();
                         window.CTEIdolManager.renderRPGContent('dashboard');
                     }
-                    if ($('#cte-idol-view-heartbeat').hasClass('active')) window.CTEIdolManager.Heartbeat.renderGrid();
+                    if ($('#cte-idol-view-heartbeat').hasClass('active') && window.CTEIdolManager.Heartbeat) {
+                        window.CTEIdolManager.Heartbeat.renderGrid();
+                    }
                 });
             }
         });
@@ -2431,11 +2524,13 @@
         $('#cte-idol-map-panel #cte-idol-overlay').hide();
         $('#cte-idol-map-panel .cte-idol-popup').hide();
         window.CTEIdolManager.closeSubMenu();
-        window.CTEIdolManager.Heartbeat.closeModal();
+        // [FIX] Update close logic to new consolidated object methods
+        if (window.CTEIdolManager.Heartbeat && window.CTEIdolManager.Heartbeat.closeModal) {
+            window.CTEIdolManager.Heartbeat.closeModal();
+        }
         window.CTEIdolManager.Contracts.closeModal();
         window.CTEIdolManager.Shop.closeModal();
         window.CTEIdolManager.closeTravelMenu(isTravelMenuVisible);
     };
 
 })();
-

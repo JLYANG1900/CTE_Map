@@ -129,11 +129,15 @@
             });
         },
 
-        // 打开成员选择弹窗
+// 打开成员选择弹窗
         openModal: function(activityName) {
             this.currentActivity = activityName;
             const grid = document.getElementById('cte-nf-profile-grid');
             const modal = document.getElementById('cte-nf-modal');
+            
+            // [关键修改 1] 获取当前的滚动容器 (Heartbeat 视图)
+            // 确保ID与你HTML中定义的视图容器ID一致
+            const viewContainer = document.getElementById('cte-idol-view-heartbeat');
             
             if (!grid || !modal) return;
             grid.innerHTML = '';
@@ -157,6 +161,20 @@
                 `;
                 grid.appendChild(item);
             }
+
+            // [关键修改 2] 动态调整弹窗位置和高度
+            if (viewContainer) {
+                // 将弹窗的 Top 设为当前滚动条的位置，确保它出现在当前视野顶部
+                modal.style.top = viewContainer.scrollTop + 'px';
+                
+                // 将弹窗的 Height 设为当前可见窗口的高度，确保 Flex 居中是在当前视野内居中
+                // 而不是在长长的滚动页面中心居中
+                modal.style.height = viewContainer.clientHeight + 'px';
+                
+                // (可选) 暂时禁止背景滚动，提升体验
+                viewContainer.style.overflow = 'hidden';
+            }
+
             modal.style.display = 'flex';
         },
 
@@ -2530,3 +2548,4 @@
     };
 
 })();
+

@@ -133,9 +133,9 @@ If the UI looks empty, trigger the character to output the relevant status by ty
 如果 UI 显示为空，可以通过输入关键词如“查看通告” or “刷新日报”来触发角色输出相关状态。
 
 ## 📄 License & Terms (许可证与条款)
-CTE Map Idol Manager (The Extension / 插件本体): The code for this extension is Open Source for personal modification and learning. However, Commercial Use is Strictly Prohibited. You may not sell, rent, or use this code for any profit-making activities. 
+CTE Map Idol Manager (The Extension / 插件本体): The code for this extension is Open Source for personal learning. However, Commercial Use is Strictly Prohibited. You may not sell, rent, or use this code for any profit-making activities. 
 
-本扩展的代码部分为 开源项目，仅供个人修改和学习使用。但是，绝对禁止任何形式的商业用途。不得将此代码用于售卖、租赁或任何盈利性活动。
+本扩展的代码部分为开源项目，供个人学习使用。但是，绝对禁止任何形式的商业用途。不得将此代码用于售卖、租赁或任何盈利性活动。
 
 Character Card (The Content / 角色卡内容): The accompanying character card (CTE男团日常mvu4.json) is the intellectual property of the original author. Usage Rights: The author strictly limits authorization to SillyTavern users who are also members of the official Discord community. Prohibition: Use or distribution of this character card through any non-author-authorized channels is absolutely forbidden. 
 

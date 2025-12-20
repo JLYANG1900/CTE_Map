@@ -7,8 +7,8 @@
   <img src="https://github.com/user-attachments/assets/4cf43ab0-e653-466e-98de-b2c6a4f7a65a" width="45%" />
   <img src="https://github.com/user-attachments/assets/6ddbcff1-2c9b-4ef9-a123-d63d8b80ffe8" width="45%" />
   <br>
-  <img src="path/to/location_detail.jpg" width="45%" />
-  <img src="path/to/travel_menu.jpg" width="45%" />
+  <img src="https://github.com/user-attachments/assets/3515e45c-df83-49e5-a80e-aa30b362d371" width="45%" />
+  <img src="https://github.com/user-attachments/assets/c2fa12a5-7f44-4dbd-b7da-24f0f14dbd4f" width="45%" />
 </div>
 </details>
 
@@ -16,9 +16,10 @@
 <summary><strong>📊 RPG Dashboard & Agency (经营与事务所)</strong></summary>
 <br>
 <div align="center">
-  <img src="path/to/dashboard.jpg" width="30%" />
-  <img src="path/to/agency_contracts.jpg" width="30%" />
-  <img src="path/to/shop.jpg" width="30%" />
+  <img src="https://github.com/user-attachments/assets/eb8e3d3d-273f-44e8-a176-52d2e58dad66" width="30%" />
+  <img src="https://github.com/user-attachments/assets/2bb4c6a9-09a7-4061-989e-195ba7484176" width="30%" />
+  <img src="https://github.com/user-attachments/assets/1641d72c-1636-44bb-b4a5-2440563dcdf" width="30%" />
+  <img src="https://github.com/user-attachments/assets/af79ab62-0b83-469e-9a24-d54ef48f69ac" width="30%" />
 </div>
 </details>
 

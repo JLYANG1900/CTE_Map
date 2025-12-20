@@ -31,6 +31,16 @@
 </div>
 </details>
 
+<details>
+<summary><strong>🎭 Character Card (角色卡)</strong></summary>
+<br>
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/c40de8c0-b483-4249-b193-04b6b9b87aaa" width="33%" />
+  <img src="https://github.com/user-attachments/assets/2a18b43a-453f-4ede-9ec5-66e5e091c6b1" width="33%" />
+  <img src="https://github.com/user-attachments/assets/9cc21af2-94ab-497c-aafc-9d023be9ffa4" width="33%" />
+</div>
+</details>
+
 ## CTE Map Idol Manager (CTE偶像男团模拟经营)
 An Immersive Idol Management RPG Extension for SillyTavern. 
 专为 SillyTavern 打造的沉浸式偶像团体经营 RPG 扩展。

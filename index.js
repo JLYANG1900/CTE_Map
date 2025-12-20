@@ -1327,7 +1327,7 @@
                             </div>
                             <div class="sent-item">
                                 <span class="sent-label">今日热词 Key Words</span>
-                                <span class="sent-value">#CTE #回归 #新歌</span>
+                                <span class="sent-value">#CTE #回归 #八卦</span>
                             </div>
                         </div>
 
@@ -2530,6 +2530,7 @@
     };
 
 })();
+
 
 
 

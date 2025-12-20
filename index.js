@@ -617,8 +617,8 @@
                         </div>
                         
                         <div style="margin-top: 15px; border-top: 2px solid #1a1a1a; padding-top:10px; opacity:0.6; font-size:10px; display:flex; justify-content:space-between;">
-                            <span>SYSTEM: MEMO MODE</span>
-                            <span>SYNCED</span>
+                            <span>此备忘录需要手动更新</span>
+                            <span>仅供参考</span>
                         </div>
                     </div>
                 </div>
@@ -2530,6 +2530,7 @@
     };
 
 })();
+
 
 
 

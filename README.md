@@ -4,7 +4,7 @@
 <summary><strong>🗺️ Map & Navigation (地图与导航)</strong></summary>
 <br>
 <div align="center">
-  <img src="<img width="1302" height="862" alt="CTE男团12" src="https://github.com/user-attachments/assets/4cf43ab0-e653-466e-98de-b2c6a4f7a65a" />" width="45%" />
+  <img src="https://github.com/user-attachments/assets/4cf43ab0-e653-466e-98de-b2c6a4f7a65a" width="45%" />
   <img src="path/to/national_map.jpg" width="45%" />
   <br>
   <img src="path/to/location_detail.jpg" width="45%" />
@@ -35,7 +35,7 @@
 An Immersive Idol Management RPG Extension for SillyTavern. 
 专为 SillyTavern 打造的沉浸式偶像团体经营 RPG 扩展。
 
-**📖 Introduction (简介)**
+## 📖 Introduction (简介)
 CTE Map Idol Manager is a comprehensive extension designed to transform your SillyTavern roleplay experience into a fully visualized simulation game. It serves as a frontend interface for the "CTE Boy Group" storyline, visualizing data such as funds, schedules, and locations, while providing interactive modules for agency management and intimate interactions.
 
 CTE Map Idol Manager 是一个全面的扩展插件，旨在将你的 SillyTavern 角色扮演体验转化为一个完全可视化的模拟经营游戏。它作为“CTE男团”剧情的前端界面，将资金、行程、地点等数据可视化，并提供了事务所管理和亲密互动的交互模块。
@@ -44,7 +44,7 @@ This extension is specifically built to work with the CTE男团日常mvu4.json c
 
 本插件是专门为 CTE男团日常mvu4.json 角色卡构建的。角色卡负责逻辑处理和文本生成，而本插件负责渲染用户界面（UI）并处理用户输入。
 
-**✨ Key Features (核心玩法)**
+## ✨ Key Features (核心玩法)
 1. Visualized City Map & Navigation (可视化城市地图与导航)
 Explore the fictional city of "Jinggang". Users can drag the map, click on locations (Dorms, Office, Airport, etc.) to view details, and trigger travel events directly through the UI. It supports sub-menus for interior rooms (e.g., specific floors in the dorm).
 
@@ -70,7 +70,7 @@ News: An automatically generated "Daily News" page that reflects the game world'
 
 快报： 自动生成的“每日快报”页面，反映游戏世界的事件，解析 LLM 输出中的头条新闻和热搜话题。 行程： 当日日程的时间轴视图，允许用户一键执行特定的行程项目。
 
-**🛠️ Technical Highlights (技术要点)**
+## 🛠️ Technical Highlights (技术要点)
 Context Parsing via Regular Expressions (基于正则的上下文解析)
 The extension does not rely solely on SillyTavern's variable system. Instead, it actively scans the chat history for custom XML-like tags (e.g., <status_top>, <news>, <contracts>, <shop>). This allows the LLM (Character Card) to dynamically update the UI by simply outputting structured text.
 
@@ -91,7 +91,7 @@ It synchronizes character stats (Affection, Desire, Skills) by reading specific 
 
 它通过读取角色卡特定输出中的变量块（stat_data）来同步角色属性（好感度、欲望、技能），将复杂的 JSON 数据可视化为易读的进度条和仪表。
 
-**📦 Installation (安装指南)**
+## 📦 Installation (安装指南)
 Download the Extension (下载扩展): Clone this repository or download the zip file. Extract the contents into your SillyTavern extensions directory: 
 
 克隆此仓库或下载压缩包。将内容解压到你的 SillyTavern 扩展目录中： /SillyTavern/public/scripts/extensions/third-party/CTE_Map
@@ -104,7 +104,7 @@ Enable & Reload (启用并重载): Import the card into SillyTavern, enable the 
 
 将卡片导入 SillyTavern，在设置中启用该扩展并刷新页面。你应该会在界面上看到一个地图图标按钮。
 
-**🎮 Usage (使用说明)**
+## 🎮 Usage (使用说明)
 Start a chat with the CTE Character Card. 
 与 CTE 角色卡 开始对话。
 
@@ -120,7 +120,7 @@ Use the tabs on the top right to switch between Map, Schedule, Agency, Heartbeat
 If the UI looks empty, trigger the character to output the relevant status by typing keywords like "查看通告" (Check Contracts) or "刷新日报" (Refresh News). 
 如果 UI 显示为空，可以通过输入关键词如“查看通告” or “刷新日报”来触发角色输出相关状态。
 
-**📄 License & Terms (许可证与条款)**
+## 📄 License & Terms (许可证与条款)
 CTE Map Idol Manager (The Extension / 插件本体): The code for this extension is Open Source for personal modification and learning. However, Commercial Use is Strictly Prohibited. You may not sell, rent, or use this code for any profit-making activities. 
 
 本扩展的代码部分为 开源项目，仅供个人修改和学习使用。但是，绝对禁止任何形式的商业用途。不得将此代码用于售卖、租赁或任何盈利性活动。

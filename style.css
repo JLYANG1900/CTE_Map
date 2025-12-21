@@ -2824,3 +2824,60 @@
         font-size: 10px !important;
     }
 }
+
+/* ========================================== */
+/* === [优化] Shop 采购中心移动端适配 === */
+/* ========================================== */
+
+@media screen and (max-width: 768px) {
+    /* 1. 调整外部大卡片的内边距，增加可视宽度 */
+    .cte-shop-card {
+        padding: 15px 10px !important; /* 减小左右内边距 */
+        width: 95% !important;
+    }
+
+    /* 2. 紧凑化单个商品卡片 */
+    .cte-shop-item {
+        padding: 8px !important;       /* 减小卡片内部留白 (原12px) */
+        gap: 8px !important;           /* 减小图片与文字的间距 (原12px) */
+        align-items: center !important; /* 让内容垂直居中对齐 */
+    }
+
+    /* 3. 【核心需求】缩小左侧图片占位符 (如刀叉图标) */
+    .cte-shop-img-placeholder {
+        width: 36px !important;        /* 缩小宽度 (原50px) */
+        height: 36px !important;       /* 缩小高度 (原50px) */
+        font-size: 14px !important;    /* 缩小内部图标字号 (原18px) */
+        margin-top: 0 !important;      /* 修正对齐 */
+    }
+
+    /* 4. 调整文字区域，防止挤压 */
+    .cte-shop-details {
+        gap: 2px !important;           /* 减小行间距 */
+    }
+
+    .cte-shop-name {
+        font-size: 13px !important;    /* 稍微调小标题字号 */
+        line-height: 1.2 !important;
+    }
+
+    .cte-shop-type-brand {
+        font-size: 8px !important;     /* 调小分类标签 */
+    }
+
+    /* 5. 调整右侧价格和按钮区域 */
+    .cte-shop-action {
+        min-width: 60px !important;    /* 减小右侧操作栏最小宽度 (原75px) */
+        margin-left: 2px !important;   
+        gap: 5px !important;
+    }
+
+    .cte-shop-price {
+        font-size: 12px !important;    /* 调小价格字体 */
+    }
+
+    .cte-shop-buy-btn {
+        padding: 4px 8px !important;   /* 缩小购买按钮 */
+        font-size: 9px !important;
+    }
+}

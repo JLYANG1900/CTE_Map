@@ -2773,8 +2773,54 @@
     opacity: 0.6; font-size: 11px; display: flex; justify-content: space-between; font-family: monospace;
 }
 
+/* ========================================== */
+/* === [优化] Agency 通告列表移动端适配 === */
+/* ========================================== */
 
+@media screen and (max-width: 768px) {
+    /* 1. 调整外部大卡片的内边距，腾出更多横向空间 */
+    .cte-agency-card {
+        padding: 15px 10px !important; /* 减小左右内边距 */
+        width: 95% !important;         /* 确保宽度占满面板 */
+    }
 
+    /* 2. 重置 Grid 布局，允许卡片缩小 */
+    .cte-agency-list {
+        /* 【关键修改】强制改为单列，且宽度自适应，不再限制最小 320px */
+        grid-template-columns: 1fr !important; 
+        gap: 10px !important; /* 减小卡片间距 */
+    }
 
+    /* 3. 缩小单个通告卡片的尺寸 */
+    .cte-agency-item {
+        padding: 10px !important;      /* 减小卡片内部留白 */
+        min-height: auto !important;   /* 取消最小高度限制，更紧凑 */
+    }
 
+    /* 4. 调整标题字号，防止换行过多 */
+    .cte-item-title-group h3 {
+        font-size: 14px !important;
+        margin-bottom: 2px !important;
+    }
 
+    /* 5. 紧凑化“要求”区域 (歌艺/舞蹈等) */
+    .cte-item-req-grid {
+        padding: 6px !important;
+        gap: 4px !important;
+        margin-bottom: 6px !important;
+    }
+
+    .cte-item-req-row {
+        font-size: 10px !important; /* 稍微调小字体 */
+    }
+
+    /* 6. 调整底部薪酬和按钮区域 */
+    .cte-item-footer {
+        padding-top: 6px !important;
+    }
+
+    .cte-item-sign-btn {
+        padding: 3px 8px !important; /* 缩小按钮尺寸 */
+        font-size: 10px !important;
+    }
+}

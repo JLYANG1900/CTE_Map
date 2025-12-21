@@ -854,73 +854,6 @@
     }
 }
 
-/* ========================================== */
-/* === [修复] Memo 弹窗移动端适配 (增强版) === */
-/* ========================================== */
-
-@media screen and (max-width: 768px) {
-    /* 1. 修复遮罩层定位问题 */
-    /* 注意：由于父级面板有 transform，fixed 会变成 absolute，所以必须强制重置位置 */
-    .cte-memo-modal-overlay {
-        position: absolute !important; /* 强制设为绝对定位，填满面板 */
-        top: 0 !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-        margin: 0 !important;
-        transform: none !important;    /* 清除可能存在的位移 */
-        background: rgba(0,0,0,0.85) !important; /* 加深背景，遮挡底部杂乱内容 */
-        z-index: 20020 !important;
-        
-        /* 弹性布局确保居中 */
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-        padding: 0 !important; /* 清除内边距干扰 */
-    }
-
-    /* 2. 调整弹窗盒子宽度与位置 */
-    .cte-memo-modal-box {
-        position: relative !important;
-        width: 90% !important;        /* 宽度设为面板的 90% */
-        max-width: none !important;   /* 移除桌面端 360px 限制 */
-        min-width: 0 !important;      /* 防止 flex 子项溢出 */
-        margin: auto !important;      /* 自动居中 */
-        left: auto !important;        /* 清除可能存在的 left 定位 */
-        top: auto !important;         /* 清除可能存在的 top 定位 */
-        transform: none !important;   /* 清除位移 */
-        
-        padding: 20px 15px !important;
-        box-sizing: border-box !important; /* 确保 padding 不会撑大盒子 */
-        border-radius: 8px !important;
-    }
-
-    /* 3. 修复输入框和按钮 */
-    .cte-memo-modal-textarea {
-        width: 100% !important;
-        height: 120px !important;
-        font-size: 14px !important;
-        box-sizing: border-box !important; /* 防止输入框撑破父容器 */
-        margin-bottom: 15px !important;
-    }
-
-    .cte-memo-modal-actions {
-        display: flex !important;
-        justify-content: space-between !important;
-        gap: 10px !important;
-        width: 100% !important;
-    }
-
-    .cte-memo-modal-btn {
-        flex: 1 !important;           /* 按钮等宽分布 */
-        padding: 10px 0 !important;   /* 增加点击区域 */
-        font-size: 13px !important;
-        white-space: nowrap !important;
-    }
-}
-
 @media screen and (max-width: 480px) {
     .cte-idol-character-portrait {
         width: 100px;
@@ -2738,6 +2671,7 @@
     margin-top: auto; border-top: 2px solid var(--cte-news-text-primary); padding-top: 15px; 
     opacity: 0.6; font-size: 11px; display: flex; justify-content: space-between; font-family: monospace;
 }
+
 
 
 

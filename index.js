@@ -2,7 +2,7 @@
     // ==========================================
     // 0. 插件配置与上下文
     // ==========================================
-    const extensionName = "CTE_Map"; 
+    const extensionName = "CTE-Map-Idol-Manager"; 
     const extensionPath = `scripts/extensions/third-party/${extensionName}`;
     let stContext = null;
     const DEFAULT_NATIONAL_BG = "https://files.catbox.moe/8z3pnp.png";
@@ -2560,5 +2560,6 @@
     };
 
 })();
+
 
 

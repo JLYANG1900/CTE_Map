@@ -854,6 +854,108 @@
     }
 }
 
+/* ========================================== */
+/* === [优化] Memo 弹窗移动端：纵向长方形适配 === */
+/* ========================================== */
+
+@media screen and (max-width: 768px) {
+    /* 1. 遮罩层：确保绝对定位覆盖面板 */
+    .cte-memo-modal-overlay {
+        position: absolute !important; 
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        transform: none !important;    
+        background: rgba(0,0,0,0.85) !important; 
+        z-index: 20020 !important;
+        padding: 0 !important;
+        /* 默认隐藏，由 .active 控制 display */
+    }
+
+    .cte-memo-modal-overlay.active {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    /* 2. 弹窗盒子：改为纵向长方形 */
+    .cte-memo-modal-box {
+        position: relative !important;
+        /* 宽度稍微收窄，留出边距 */
+        width: 85% !important;        
+        max-width: 320px !important;  
+        
+        /* 【核心修改】设置最小高度，强制变成纵向长方形 */
+        min-height: 55vh !important;  
+        max-height: 90% !important;
+        
+        margin: auto !important;      
+        left: auto !important;        
+        top: auto !important;         
+        transform: none !important;   
+        
+        padding: 20px !important;
+        box-sizing: border-box !important; 
+        border-radius: 8px !important;
+        
+        /* 使用 Flex 纵向布局 */
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    /* 3. 输入框：自动撑开高度 */
+    .cte-memo-modal-textarea {
+        width: 100% !important;
+        /* 让输入框占据剩余空间，拉长视觉效果 */
+        flex: 1 !important; 
+        min-height: 150px !important; /* 保证最小高度 */
+        font-size: 14px !important;
+        box-sizing: border-box !important; 
+        margin-bottom: 15px !important;
+    }
+
+    /* 4. 日期选择栏：改为上下排列 */
+    .cte-memo-modal-input-group {
+        display: flex !important;
+        flex-direction: column !important; /* 上下堆叠 */
+        align-items: flex-start !important;
+        gap: 5px !important;
+        margin-bottom: 20px !important;
+        width: 100% !important;
+    }
+
+    .cte-memo-modal-input-group label {
+        font-size: 12px !important;
+        margin-bottom: 2px !important;
+    }
+
+    .cte-memo-modal-date-input {
+        width: 100% !important; /* 日期输入框占满整行 */
+        padding: 8px !important;
+        box-sizing: border-box !important;
+    }
+
+    /* 5. 底部按钮 */
+    .cte-memo-modal-actions {
+        display: flex !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        width: 100% !important;
+        margin-top: auto !important; /* 推到底部 */
+    }
+
+    .cte-memo-modal-btn {
+        flex: 1 !important;           
+        padding: 12px 0 !important;   
+        font-size: 14px !important;
+        height: auto !important;
+    }
+}
+
 @media screen and (max-width: 480px) {
     .cte-idol-character-portrait {
         width: 100px;
@@ -2671,6 +2773,7 @@
     margin-top: auto; border-top: 2px solid var(--cte-news-text-primary); padding-top: 15px; 
     opacity: 0.6; font-size: 11px; display: flex; justify-content: space-between; font-family: monospace;
 }
+
 
 
 
